@@ -7,6 +7,7 @@ export default [
       "unicorn/filename-case": "off",
       "unicorn/no-null": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
+      "no-console": "off",
     },
   },
 ];
