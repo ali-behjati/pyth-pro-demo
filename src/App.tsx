@@ -10,6 +10,8 @@ import { usePriceDataManager } from "./hooks/usePriceDataManager";
 import { usePythLazerWebSocket } from "./hooks/usePythLazerWebSocket";
 import { usePythWebSocket } from "./hooks/usePythWebSocket";
 
+const NOOP = () => {};
+
 const App: React.FC = () => {
   const {
     chartData,
@@ -20,27 +22,27 @@ const App: React.FC = () => {
   } = usePriceDataManager();
 
   // Initialize WebSocket connections
-  useBinanceWebSocket(handlePriceUpdate, (status) => {
+  useBinanceWebSocket(NOOP, (status) => {
     handleStatusChange("binance", status);
   });
 
-  useCoinbaseWebSocket(handlePriceUpdate, (status) => {
+  useCoinbaseWebSocket(NOOP, (status) => {
     handleStatusChange("coinbase", status);
   });
 
-  usePythWebSocket(handlePriceUpdate, (status) => {
+  usePythWebSocket(NOOP, (status) => {
     handleStatusChange("pyth", status);
   });
 
-  usePythLazerWebSocket(handlePriceUpdate, (status) => {
+  usePythLazerWebSocket(NOOP, (status) => {
     handleStatusChange("pythlazer", status);
   });
 
-  useOKXWebSocket(handlePriceUpdate, (status) => {
+  useOKXWebSocket(NOOP, (status) => {
     handleStatusChange("okx", status);
   });
 
-  useBybitWebSocket(handlePriceUpdate, (status) => {
+  useBybitWebSocket(NOOP, (status) => {
     handleStatusChange("bybit", status);
   });
 
