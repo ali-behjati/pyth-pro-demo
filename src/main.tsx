@@ -1,8 +1,8 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import React from "react";
+import ReactDOM from "react-dom/client";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <App />
-)
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.querySelector("#root")!).render(<App />);

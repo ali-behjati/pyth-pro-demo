@@ -5,8 +5,9 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 ## Features
 
 - **Real-time Price Feeds**: Connects to three major data sources:
+
   - **Binance** (BTC/USDT)
-  - **Coinbase** (BTC-USD) 
+  - **Coinbase** (BTC-USD)
   - **Pyth Network** (BTC/USD)
 
 - **Live Chart**: Interactive line chart showing the last 60 seconds of price data
@@ -28,30 +29,34 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 ### Prerequisites
 
 - Node.js (version 16 or higher)
-- npm or yarn
+- pnpm or yarn
 - Pyth Lazer auth token (required for Pyth Lazer WebSocket connection)
 
 ### Installation
 
 1. Clone or download this project
 2. Navigate to the project directory:
+
    ```bash
    cd btc-demo
    ```
 
 3. Install dependencies:
+
    ```bash
-   npm install
+   pnpm install
    ```
 
 4. Create a `.env` file in the project root and add your Pyth Lazer auth token:
+
    ```bash
    VITE_PYTH_LAZER_AUTH_TOKEN=your_auth_token_here
    ```
 
 5. Start the development server:
+
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 6. Open your browser and navigate to `http://localhost:3000`
@@ -59,7 +64,7 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 ### Build for Production
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ## How It Works
@@ -91,6 +96,7 @@ npm run build
 ## WebSocket Connection Details
 
 The application handles WebSocket connections with:
+
 - Automatic reconnection on disconnect
 - Connection status indicators
 - Error handling and recovery
