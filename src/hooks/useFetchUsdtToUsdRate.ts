@@ -1,0 +1,87 @@
+import { useEffect, useRef, useState } from "react";
+
+type UseFetchUsdtToUsdRateOpts = {
+  refetchInterval?: number;
+  url?: string;
+};
+
+export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
+  /** props */
+  const {
+    refetchInterval,
+    url = "https://hermes.pyth.network/v2/updates/price/latest?ids%5B%5D=2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
+  } = opts ?? {};
+
+  /** refs */
+  const abortSignalRef = useRef<AbortController | undefined>(undefined);
+
+  /** state */
+  const [usdtToUsdRate, setUsdtToUsdRate] = useState(1);
+  const [fetchTime, setFetchTime] = useState(0);
+  const [error, setError] = useState<Error | undefined>(undefined);
+
+  /** effects */
+  useEffect(() => {
+    if (abortSignalRef.current) {
+      abortSignalRef.current.abort();
+    }
+
+    const a = new AbortController();
+    abortSignalRef.current = a;
+
+    fetch(url, { signal: a.signal })
+      .then((r) => r.json())
+      .then((data: HermesPriceResponse) => {
+        const price = Number(data.parsed[0]?.price.price) / Math.pow(10, 8);
+        setUsdtToUsdRate(price);
+      })
+      .catch(setError);
+
+    return () => {
+      abortSignalRef.current?.abort();
+    };
+  }, [fetchTime]);
+
+  useEffect(() => {
+    if (!refetchInterval) return;
+
+    const t = setTimeout(() => {
+      setFetchTime(Date.now());
+    }, refetchInterval);
+    return () => {
+      clearTimeout(t);
+    };
+  }, [refetchInterval]);
+
+  return { usdtToUsdRate, error };
+}
+
+export type HermesPriceResponse = {
+  binary: Binary;
+  parsed: Parsed[];
+};
+
+export type Binary = {
+  encoding: string;
+  data: string[];
+};
+
+export type Parsed = {
+  id: string;
+  price: Price;
+  ema_price: Price;
+  metadata: Metadata;
+};
+
+export type Price = {
+  price: string;
+  conf: string;
+  expo: number;
+  publish_time: number;
+};
+
+export type Metadata = {
+  slot: number;
+  proof_available_time: number;
+  prev_publish_time: number;
+};
