@@ -1,7 +1,6 @@
 import { useCallback } from "react";
-import { useShallow } from "zustand/shallow";
 
-import { usePythProStore } from "../state";
+import { useAppStateContext } from "../context";
 import { isAllowedCryptoSymbol } from "../types";
 
 type BinanceOrderBookData = {
@@ -13,34 +12,34 @@ type BinanceOrderBookData = {
 };
 
 export function useBinanceWebSocket() {
-  /** store */
-  const addPriceEntry = usePythProStore(
-    useShallow((state) => state.addPriceEntry),
-  );
+  /** context */
+  const { addDataPoint } = useAppStateContext();
 
   /** callbacks */
-  const onMessage = useCallback((usdtToUsdRate: number, socketData: string) => {
-    try {
-      const data = JSON.parse(socketData) as BinanceOrderBookData;
-      if (isAllowedCryptoSymbol(data.s)) {
-        // Calculate mid price from best bid and best ask
-        const bestBid = Number.parseFloat(data.b);
-        const bestAsk = Number.parseFloat(data.a);
-        const midPriceUSDT = (bestBid + bestAsk) / 2;
+  const onMessage = useCallback(
+    (usdtToUsdRate: number, socketData: string) => {
+      try {
+        const data = JSON.parse(socketData) as BinanceOrderBookData;
+        if (isAllowedCryptoSymbol(data.s)) {
+          // Calculate mid price from best bid and best ask
+          const bestBid = Number.parseFloat(data.b);
+          const bestAsk = Number.parseFloat(data.a);
+          const midPriceUSDT = (bestBid + bestAsk) / 2;
 
-        // Convert USDT to USD using the fetched rate
-        const midPriceUSD = midPriceUSDT * usdtToUsdRate;
+          // Convert USDT to USD using the fetched rate
+          const midPriceUSD = midPriceUSDT * usdtToUsdRate;
 
-        addPriceEntry(data.s, "binance", {
-          price: midPriceUSD,
-          timestamp: Date.now(),
-          source: "binance",
-        });
+          addDataPoint("binance", data.s, {
+            price: midPriceUSD,
+            timestamp: Date.now(),
+          });
+        }
+      } catch {
+        // Ignore malformed WebSocket payloads
       }
-    } catch {
-      // Ignore malformed WebSocket payloads
-    }
-  }, []);
+    },
+    [addDataPoint],
+  );
 
   return { onMessage };
 }

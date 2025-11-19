@@ -63,22 +63,25 @@ export function useDataStream({
   const { onMessage: binanceOnMessage } = useBinanceWebSocket();
 
   /** callbacks */
-  const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
-    const strData = String(e.data);
-    switch (symbol) {
-      case "BTCUSDT":
-      case "ETHUSDT": {
-        switch (dataSource) {
-          case "binance": {
-            if (!isNullOrUndefined(usdtToUsdRate)) {
-              binanceOnMessage(usdtToUsdRate, strData);
+  const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
+    (_, e) => {
+      const strData = String(e.data);
+      switch (symbol) {
+        case "BTCUSDT":
+        case "ETHUSDT": {
+          switch (dataSource) {
+            case "binance": {
+              if (!isNullOrUndefined(usdtToUsdRate)) {
+                binanceOnMessage(usdtToUsdRate, strData);
+              }
+              break;
             }
-            break;
           }
         }
       }
-    }
-  }, []);
+    },
+    [binanceOnMessage, usdtToUsdRate],
+  );
 
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(() => {
     switch (symbol) {

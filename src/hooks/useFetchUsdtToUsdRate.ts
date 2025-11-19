@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Nullish } from "../types";
 
@@ -59,7 +59,7 @@ export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
     };
   }, [enabled, refetchInterval]);
 
-  return { usdtToUsdRate, error };
+  return useMemo(() => ({ error, usdtToUsdRate }), [error, usdtToUsdRate]);
 }
 
 export type HermesPriceResponse = {

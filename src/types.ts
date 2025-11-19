@@ -28,32 +28,26 @@ export type DataSourcesCrypto =
 
 export type PriceData = {
   price: number;
-  source: DataSourcesCrypto;
-  timestamp: number;
-};
-
-export type PricePoint = {
-  binance?: Nullish<number>;
-  bybit?: Nullish<number>;
-  coinbase?: Nullish<number>;
-  okx?: Nullish<number>;
-  pyth?: Nullish<number>;
-  pythlazer?: Nullish<number>;
   timestamp: number;
 };
 
 export type CurrentPriceMetrics = {
   change: Nullish<number>;
   changePercent: Nullish<number>;
-  data: PricePoint[];
   price: Nullish<number>;
+  timestamp: number;
 };
 
-export type CurrentCryptoPriceState = Record<
-  DataSourcesCrypto,
-  Nullish<CurrentPriceMetrics>
+export type LatestMetric = Partial<
+  Record<AllowedCryptoSymbolsType, CurrentPriceMetrics>
 >;
 
-export type CurrentPricesState = {
-  state: Record<AllowedCryptoSymbolsType, CurrentCryptoPriceState>;
+export type AllAndLatestDataState = {
+  all: Partial<Record<AllowedCryptoSymbolsType, CurrentPriceMetrics[]>>;
+  latest: Nullish<LatestMetric>;
 };
+
+export type CurrentPricesState = Record<
+  DataSourcesCrypto,
+  AllAndLatestDataState
+>;

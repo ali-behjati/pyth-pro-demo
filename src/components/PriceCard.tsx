@@ -1,37 +1,29 @@
+import { sentenceCase } from "change-case";
 import React from "react";
 
-import type { Nullish } from "../types";
+import { useAppStateContext } from "../context";
+import type { useWebSocket } from "../hooks/useWebSocket";
+import type {
+  AllowedCryptoSymbolsType,
+  DataSourcesCrypto,
+  Nullish,
+} from "../types";
+import { isNullOrUndefined } from "../util";
 
-type PriceCardProps = {
-  exchangeName: string;
-  price: Nullish<number>;
-  change: Nullish<number>;
-  changePercent: Nullish<number>;
-  status: "connected" | "disconnected" | "connecting";
+type PriceCardProps = Pick<ReturnType<typeof useWebSocket>, "status"> & {
+  dataSource: DataSourcesCrypto;
+  symbol: AllowedCryptoSymbolsType;
 };
 
 const formatChange = (
   change: Nullish<number>,
   changePercent: Nullish<number>,
 ): string => {
-  if (typeof change !== "number" || typeof changePercent !== "number")
+  if (isNullOrUndefined(change) || isNullOrUndefined(changePercent)) {
     return "N/A";
+  }
   const sign = change >= 0 ? "+" : "";
   return `${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)`;
-};
-
-const getStatusText = (status: string): string => {
-  switch (status) {
-    case "connected": {
-      return "Connected";
-    }
-    case "connecting": {
-      return "Connecting...";
-    }
-    default: {
-      return "Disconnected";
-    }
-  }
 };
 
 const formatPrice = (price: Nullish<number>): string => {
@@ -51,49 +43,28 @@ const getChangeClass = (change: Nullish<number>): string => {
   return "price-neutral";
 };
 
-const getStatusClass = (status: string): string => {
-  switch (status) {
-    case "connected": {
-      return "status-connected";
-    }
-    case "connecting": {
-      return "status-connecting";
-    }
-    default: {
-      return "status-disconnected";
-    }
-  }
-};
+export function PriceCard({ dataSource, symbol, status }: PriceCardProps) {
+  /** context */
+  const state = useAppStateContext();
+  const metrics = state[dataSource].latest?.[symbol];
 
-const PriceCard: React.FC<PriceCardProps> = ({
-  exchangeName,
-  price,
-  change,
-  changePercent,
-  status,
-}) => {
   return (
     <div className="price-card">
       <h3>
-        <span className={`status-indicator ${getStatusClass(status)}`}></span>
-        {exchangeName}
+        <span className="status-indicator"></span>
+        {sentenceCase(dataSource)}
       </h3>
-      <div className="price-value">{formatPrice(price)}</div>
-      <div className={`price-change ${getChangeClass(change)}`}>
-        {formatChange(change, changePercent)}
-      </div>
-      <div
-        className="status-text"
-        style={{
-          fontSize: "0.8rem",
-          marginTop: "0.5rem",
-          color: "rgba(255, 255, 255, 0.7)",
-        }}
-      >
-        {getStatusText(status)}
-      </div>
+      {metrics && (
+        <>
+          <div className="price-value">{formatPrice(metrics.price)}</div>
+          <div className={`price-change ${getChangeClass(metrics.change)}`}>
+            {formatChange(metrics.change, metrics.changePercent)}
+          </div>
+        </>
+      )}
+      <div>{status}</div>
     </div>
   );
-};
+}
 
 export default PriceCard;

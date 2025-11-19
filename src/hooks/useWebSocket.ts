@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SocketteOptions } from "sockette";
 import Sockette from "sockette";
+import throttle from "throttleit";
 
 export type UseWebSocketOpts = {
   enabled?: boolean;
@@ -90,7 +91,8 @@ export function useWebSocket(
   useEffect(() => {
     onCloseRef.current = onClose;
     onErrorRef.current = onError;
-    onMessageRef.current = onMessage;
+    // onmessage can only get called at most once every 50 ms
+    onMessageRef.current = throttle(onMessage, 50);
     onOpenRef.current = onOpen;
     onReconnectRef.current = onReconnect;
   });
