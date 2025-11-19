@@ -1,13 +1,23 @@
 import React from "react";
 
 import { PriceCard } from "./components/PriceCard";
+import { SourceSelector } from "./components/SourceSelector";
+import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
+import { isAllowedCryptoSymbol } from "./types";
 
 export function App() {
+  /** context */
+  const { selectedSource } = useAppStateContext();
+
+  /** local variables */
+  const isCryptoSource = isAllowedCryptoSymbol(selectedSource);
+
   /** hooks */
   const { status: binanceStatus } = useDataStream({
     dataSource: "binance",
-    symbol: "BTCUSDT",
+    enabled: isCryptoSource,
+    symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
   });
 
   return (
@@ -25,12 +35,20 @@ export function App() {
         </p>
       </div>
 
+      <div>
+        <SourceSelector />
+      </div>
+
       <div className="price-cards">
-        <PriceCard
-          dataSource="binance"
-          symbol="BTCUSDT"
-          status={binanceStatus}
-        />
+        {isCryptoSource && (
+          <>
+            <PriceCard
+              dataSource="binance"
+              symbol={selectedSource}
+              status={binanceStatus}
+            />
+          </>
+        )}
         {/* <PriceCard
           exchangeName="Binance"
           price={currentPrices.binance?.price}

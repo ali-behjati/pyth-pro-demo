@@ -18,6 +18,8 @@ type AppStateContextVal = CurrentPricesState & {
     symbol: AllowedCryptoSymbolsType,
     dataPoint: PriceData,
   ) => void;
+
+  handleSelectSource: (source: AllowedCryptoSymbolsType) => void;
 };
 
 const context = createContext<Nullish<AppStateContextVal>>(null);
@@ -31,6 +33,7 @@ export function AppStateProvider({ children }: PropsWithChildren) {
     okx: { all: {}, latest: {} },
     pyth: { all: {}, latest: {} },
     pythlazer: { all: {}, latest: {} },
+    selectedSource: null,
   });
 
   /** callbacks */
@@ -69,13 +72,21 @@ export function AppStateProvider({ children }: PropsWithChildren) {
     [],
   );
 
+  const handleSelectSource = useCallback((source: AllowedCryptoSymbolsType) => {
+    setAppState((prev) => ({
+      ...prev,
+      selectedSource: source,
+    }));
+  }, []);
+
   /** provider val */
   const providerVal = useMemo<AppStateContextVal>(
     () => ({
       ...appState,
       addDataPoint,
+      handleSelectSource,
     }),
-    [appState],
+    [appState, handleSelectSource],
   );
 
   return <context.Provider value={providerVal}>{children}</context.Provider>;

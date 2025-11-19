@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 
-import type { AllowedCryptoSymbolsType, DataSourcesCrypto } from "../types";
+import type {
+  AllowedCryptoSymbolsType,
+  DataSourcesCrypto,
+  Nullish,
+} from "../types";
 import { useBinanceWebSocket } from "./useBinanceWebSocket";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -11,9 +15,11 @@ const PYTH_LAZER_ENDPOINT = "wss://pyth-lazer.dourolabs.app/v1/stream";
 const PYTH_LAZER_AUTH_TOKEN = import.meta.env.VITE_PYTH_LAZER_AUTH_TOKEN;
 
 function getUrlForSymbolAndDataSource(
-  symbol: AllowedCryptoSymbolsType,
   dataSource: DataSourcesCrypto,
+  symbol: Nullish<AllowedCryptoSymbolsType>,
 ) {
+  if (!symbol) return null;
+
   switch (symbol) {
     case "BTCUSDT":
     case "ETHUSDT": {
@@ -44,7 +50,7 @@ function getUrlForSymbolAndDataSource(
 type UseDataStreamOpts = {
   dataSource: DataSourcesCrypto;
   enabled?: boolean;
-  symbol: AllowedCryptoSymbolsType;
+  symbol: Nullish<AllowedCryptoSymbolsType>;
 };
 
 /**
@@ -97,13 +103,12 @@ export function useDataStream({
   }, []);
 
   /** websocket */
-  const { status } = useWebSocket(
-    getUrlForSymbolAndDataSource(symbol, dataSource),
-    {
-      onMessage,
-      onOpen,
-    },
-  );
+  const url = getUrlForSymbolAndDataSource(dataSource, symbol);
+  const { status } = useWebSocket(url, {
+    enabled: enabled && Boolean(url),
+    onMessage,
+    onOpen,
+  });
 
   return { status };
 }

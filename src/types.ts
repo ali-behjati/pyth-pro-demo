@@ -9,7 +9,7 @@ export type AllowedCryptoSymbolsType = ArrayValues<
 >;
 
 export function isAllowedCryptoSymbol(
-  symbol: string,
+  symbol: Nullish<string>,
 ): symbol is AllowedCryptoSymbolsType {
   for (const s of ALLOWED_CRYPTO_SYMBOLS) {
     if (s === symbol) return true;
@@ -50,4 +50,17 @@ export type AllAndLatestDataState = {
 export type CurrentPricesState = Record<
   DataSourcesCrypto,
   AllAndLatestDataState
->;
+> & {
+  selectedSource: Nullish<AllowedCryptoSymbolsType>;
+};
+
+const SOURCE_SELECTOR_OPTS = ALLOWED_CRYPTO_SYMBOLS.map((symbol) => ({
+  label: symbol,
+  group: "crypto",
+  value: symbol,
+}));
+
+export const GROUPED_SOURCE_SELECTOR_OPTS = Object.groupBy(
+  SOURCE_SELECTOR_OPTS,
+  (opt) => opt.group,
+);

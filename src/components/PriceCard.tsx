@@ -52,7 +52,7 @@ export function PriceCard({ dataSource, symbol, status }: PriceCardProps) {
     <div className="price-card">
       <h3>
         <span className="status-indicator"></span>
-        {sentenceCase(dataSource)}
+        {sentenceCase(dataSource)}: {symbol.toUpperCase()}
       </h3>
       {metrics && (
         <>

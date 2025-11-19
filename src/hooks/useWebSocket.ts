@@ -3,6 +3,8 @@ import type { SocketteOptions } from "sockette";
 import Sockette from "sockette";
 import throttle from "throttleit";
 
+import type { Nullish } from "../types";
+
 export type UseWebSocketOpts = {
   enabled?: boolean;
   onClose?: (
@@ -28,7 +30,7 @@ export type UseWebSocketOpts = {
 };
 
 export function useWebSocket(
-  url: string,
+  url: Nullish<string>,
   {
     enabled = true,
     onClose,
@@ -53,25 +55,37 @@ export function useWebSocket(
 
   /** callbacks */
   const connectSocket = useCallback(() => {
-    if (!enabled) return;
+    if (!enabled || !url) return;
+
+    console.info("connecting to", url);
 
     const w = new Sockette(url, {
       onclose: (...args) => {
+        if (wsRef.current !== w) return;
+
         setStatus("closed");
         onCloseRef.current?.(w, ...args);
       },
       onerror: (...args) => {
+        if (wsRef.current !== w) return;
+
         setStatus("closed");
         onErrorRef.current?.(w, ...args);
       },
       onmessage: (...args) => {
+        if (wsRef.current !== w) return;
+
         onMessageRef.current(w, ...args);
       },
       onopen: (...args) => {
+        if (wsRef.current !== w) return;
+
         setStatus("connected");
         onOpenRef.current?.(w, ...args);
       },
       onreconnect: (...args) => {
+        if (wsRef.current !== w) return;
+
         setStatus("reconnecting");
         onReconnectRef.current?.(w, ...args);
       },
@@ -80,12 +94,15 @@ export function useWebSocket(
     setStatus("connecting");
 
     wsRef.current = w;
-  }, [url]);
+  }, [enabled, url]);
 
   const closeSocket = useCallback(() => {
-    wsRef.current?.close();
+    if (!wsRef.current) return;
+
+    console.info("closing", url);
+    wsRef.current.close();
     setStatus("closed");
-  }, []);
+  }, [url]);
 
   /** effects */
   useEffect(() => {
