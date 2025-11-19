@@ -11,6 +11,7 @@ import type { UseWebSocketOpts } from "./useWebSocket";
 import { useWebSocket } from "./useWebSocket";
 import { isNullOrUndefined } from "../util";
 import { useBybitWebSocket } from "./useBybitWebSocket";
+import { useCoinbaseWebSocket } from "./useCoinbaseWebSocket";
 
 const PYTH_LAZER_ENDPOINT = "wss://pyth-lazer.dourolabs.app/v1/stream";
 const PYTH_LAZER_AUTH_TOKEN = import.meta.env.VITE_PYTH_LAZER_AUTH_TOKEN;
@@ -29,19 +30,19 @@ function getUrlForSymbolAndDataSource(
           return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@bookTicker`;
         }
         case "bybit": {
-          return "wss://stream.bybit.com/v5/public/spot";
+          return `wss://stream.bybit.com/v5/public/spot?__cachebust=${symbol.toLowerCase()}`;
         }
         case "coinbase": {
-          return "wss://advanced-trade-ws.coinbase.com";
+          return `wss://advanced-trade-ws.coinbase.com?__cachebust=${symbol.toLowerCase()}`;
         }
         case "okx": {
-          return "wss://ws.okx.com:8443/ws/v5/public";
+          return `wss://ws.okx.com:8443/ws/v5/public?__cachebust=${symbol.toLowerCase()}`;
         }
         case "pyth": {
-          return "wss://hermes.pyth.network/ws";
+          return `wss://hermes.pyth.network/ws?__cachebust=${symbol.toLowerCase()}`;
         }
         case "pythlazer": {
-          return `${PYTH_LAZER_ENDPOINT}?${PYTH_LAZER_AUTH_TOKEN}`;
+          return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${PYTH_LAZER_AUTH_TOKEN}&__cachebust=${symbol.toLowerCase()}`;
         }
       }
     }
@@ -70,25 +71,29 @@ export function useDataStream({
   const { onMessage: binanceOnMessage } = useBinanceWebSocket();
   const { onMessage: bybitOnMessage, onOpen: bybitOnOpen } =
     useBybitWebSocket();
+  const { onMessage: coinbaseOnMessage, onOpen: coinbaseOnOpen } =
+    useCoinbaseWebSocket();
 
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
     (_, e) => {
+      if (isNullOrUndefined(usdtToUsdRate)) return;
       const strData = String(e.data);
+
       switch (symbol) {
         case "BTCUSDT":
         case "ETHUSDT": {
           switch (dataSource) {
             case "binance": {
-              if (!isNullOrUndefined(usdtToUsdRate)) {
-                binanceOnMessage(usdtToUsdRate, strData);
-              }
+              binanceOnMessage(usdtToUsdRate, strData);
               break;
             }
             case "bybit": {
-              if (!isNullOrUndefined(usdtToUsdRate)) {
-                bybitOnMessage(usdtToUsdRate, strData);
-              }
+              bybitOnMessage(usdtToUsdRate, strData);
+              break;
+            }
+            case "coinbase": {
+              coinbaseOnMessage(usdtToUsdRate, strData);
               break;
             }
           }
@@ -106,6 +111,10 @@ export function useDataStream({
           switch (dataSource) {
             case "bybit": {
               bybitOnOpen(...args);
+              break;
+            }
+            case "coinbase": {
+              coinbaseOnOpen(...args);
               break;
             }
             default: {

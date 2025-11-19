@@ -20,18 +20,20 @@ type BybitOrderBookData = {
 
 export function useBybitWebSocket() {
   /** context */
-  const { addDataPoint } = useAppStateContext();
+  const { addDataPoint, selectedSource } = useAppStateContext();
 
   /** callbacks */
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (socket) => {
+      if (!selectedSource) return;
+
       const subscribeMessage = {
         op: "subscribe",
-        args: ["orderbook.1.BTCUSDT"],
+        args: [`orderbook.1.${selectedSource}`],
       };
       socket.json(subscribeMessage);
     },
-    [],
+    [selectedSource],
   );
   const onMessage = useCallback((usdtToUsdRate: number, socketData: string) => {
     const data = JSON.parse(socketData) as Partial<

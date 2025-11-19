@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { useRef, useCallback } from "react";
 
-import type { PriceData } from "../types";
 import type { UseWebSocketOpts } from "./useWebSocket";
-import { useWebSocket } from "./useWebSocket";
+import { useAppStateContext } from "../context";
+import type { AllowedCryptoSymbolsType } from "../types";
+import { isAllowedCryptoSymbol } from "../types";
+import { isNullOrUndefined } from "../util";
 
 type CoinbaseAdvancedTradeLevel2Message = {
   channel: string;
@@ -11,7 +14,7 @@ type CoinbaseAdvancedTradeLevel2Message = {
   sequence_num: number;
   events: {
     type: string;
-    product_id: string;
+    product_id: "BTC-USD" | "ETH-USD";
     updates?: {
       side: string; // "bid" or "offer"
       event_time: string;
@@ -40,9 +43,10 @@ type CoinbaseLevel2Snapshot = {
   }[];
 };
 
-export const useCoinbaseWebSocket = (
-  onPriceUpdate: (data: PriceData) => void,
-) => {
+export function useCoinbaseWebSocket() {
+  /** context */
+  const { addDataPoint } = useAppStateContext();
+
   // Maintain local orderbook state for best bid/ask
   const orderbookRef = useRef<{
     bids: Map<string, string>; // price -> quantity
@@ -84,9 +88,8 @@ export const useCoinbaseWebSocket = (
     },
     [],
   );
-  const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const data = JSON.parse(e.data) as Partial<{
+  const onMessage = useCallback((_: number, strData: string) => {
+    const data = JSON.parse(strData) as Partial<{
       channel: string;
       events: CoinbaseAdvancedTradeLevel2Message["events"];
     }>;
@@ -94,7 +97,11 @@ export const useCoinbaseWebSocket = (
     // Handle Advanced Trade level2 orderbook messages
     if (data.channel === "l2_data" && data.events) {
       for (const event of data.events) {
-        if (event.product_id === "BTC-USD") {
+        let symbol: AllowedCryptoSymbolsType | null = null;
+        if (event.product_id === "BTC-USD") symbol = "BTCUSDT";
+        else if (event.product_id === "ETH-USD") symbol = "ETHUSDT";
+
+        if (isAllowedCryptoSymbol(symbol)) {
           // Handle snapshot (initial orderbook state)
           if (event.type === "snapshot") {
             const snapshotEvent =
@@ -130,11 +137,10 @@ export const useCoinbaseWebSocket = (
 
             // Calculate and emit price after snapshot
             const midPrice = calculateMidPrice();
-            if (midPrice !== null) {
-              onPriceUpdate({
+            if (!isNullOrUndefined(midPrice)) {
+              addDataPoint("coinbase", symbol, {
                 price: midPrice,
                 timestamp: Date.now(),
-                source: "coinbase",
               });
             }
           }
@@ -173,11 +179,10 @@ export const useCoinbaseWebSocket = (
 
               // Calculate and emit price after updates
               const midPrice = calculateMidPrice();
-              if (midPrice !== null) {
-                onPriceUpdate({
+              if (!isNullOrUndefined(midPrice)) {
+                addDataPoint("coinbase", symbol, {
                   price: midPrice,
                   timestamp: Date.now(),
-                  source: "coinbase",
                 });
               }
             }
@@ -187,15 +192,5 @@ export const useCoinbaseWebSocket = (
     }
   }, []);
 
-  /** hooks */
-  const { close, reconnect, status } = useWebSocket(
-    "wss://advanced-trade-ws.coinbase.com",
-    { onOpen, onMessage },
-  );
-
-  return {
-    isConnected: status === "connected",
-    reconnect,
-    disconnect: close,
-  };
-};
+  return { onMessage, onOpen };
+}
