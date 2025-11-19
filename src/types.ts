@@ -4,6 +4,15 @@ export type Nullish<T> = T | null | undefined;
 
 export const ALLOWED_CRYPTO_SYMBOLS = ["BTCUSDT", "ETHUSDT"] as const;
 
+export const DATA_SOURCES_CRYPTO = [
+  "binance",
+  "bybit",
+  "coinbase",
+  "okx",
+  "pyth",
+  "pythlazer",
+] as const;
+
 export type AllowedCryptoSymbolsType = ArrayValues<
   typeof ALLOWED_CRYPTO_SYMBOLS
 >;
@@ -18,13 +27,7 @@ export function isAllowedCryptoSymbol(
   return false;
 }
 
-export type DataSourcesCrypto =
-  | "binance"
-  | "coinbase"
-  | "pyth"
-  | "pythlazer"
-  | "okx"
-  | "bybit";
+export type DataSourcesCrypto = ArrayValues<typeof DATA_SOURCES_CRYPTO>;
 
 export type PriceData = {
   price: number;

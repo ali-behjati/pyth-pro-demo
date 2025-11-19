@@ -1,6 +1,7 @@
 import React from "react";
 
 import { PriceCard } from "./components/PriceCard";
+import { PriceChart } from "./components/PriceChart";
 import { SourceSelector } from "./components/SourceSelector";
 import { PYTH_LAZER_AUTH_TOKEN } from "./constants";
 import { useAppStateContext } from "./context";
@@ -114,7 +115,7 @@ export function App() {
         )}
       </div>
 
-      {/* <PriceChart data={chartData} /> */}
+      <PriceChart />
 
       <div
         style={{

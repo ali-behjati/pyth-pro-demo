@@ -1,0 +1,140 @@
+import {
+  CategoryScale,
+  Chart,
+  Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Tooltip,
+} from "chart.js";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+import classes from "./PriceChart.module.css";
+import { MAX_DATA_AGE, MAX_DATA_POINTS } from "../../constants";
+import { useAppStateContext } from "../../context";
+import type { DataSourcesCrypto, Nullish } from "../../types";
+import { DATA_SOURCES_CRYPTO, isAllowedCryptoSymbol } from "../../types";
+import { isNullOrUndefined } from "../../util";
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend,
+  TimeScale,
+);
+
+export function PriceChart() {
+  /** context */
+  const state = useAppStateContext();
+
+  /** refs */
+  const chartjsRef = useRef<Chart>(undefined);
+
+  /** state */
+  const [chartRef, setChartRef] = useState<Nullish<HTMLCanvasElement>>(null);
+
+  /** effects */
+  useEffect(() => {
+    if (!chartRef) return;
+
+    const c = new Chart(chartRef, {
+      type: "line",
+      data: { datasets: [] },
+      options: {
+        animation: false,
+        elements: {
+          point: { radius: 0 },
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: false,
+            type: "linear", // push numeric timestamps or indices
+            grid: { display: true },
+            ticks: { display: false },
+          },
+          y: { type: "linear", beginAtZero: false, grid: { display: true } },
+        },
+        plugins: {
+          legend: { display: true, labels: { usePointStyle: true } },
+          tooltip: { enabled: false },
+        },
+      },
+    });
+
+    chartjsRef.current = c;
+  }, [chartRef]);
+
+  useEffect(() => {
+    if (!chartjsRef.current || !state.selectedSource) return;
+    const { current: c } = chartjsRef;
+
+    for (const dataSource of DATA_SOURCES_CRYPTO) {
+      const latest = state[dataSource].latest;
+      const symbolMetrics = latest?.[state.selectedSource];
+      if (
+        isNullOrUndefined(symbolMetrics) ||
+        isNullOrUndefined(symbolMetrics.price)
+      ) {
+        continue;
+      }
+
+      let ds = c.data.datasets.find((d) => d.label === dataSource);
+      if (!ds) {
+        ds = {
+          data: [],
+          borderColor: pickColorForSource(dataSource),
+          label: dataSource,
+          pointBorderWidth: 1,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+        };
+        c.data.datasets.push(ds);
+      }
+
+      ds.data.push({ x: symbolMetrics.timestamp, y: symbolMetrics.price });
+
+      const end = symbolMetrics.timestamp;
+      const start = end - MAX_DATA_AGE;
+
+      ds.data = (ds.data as { x: number; y: number }[])
+        .filter((d) => d.x >= start && d.x <= end)
+        .slice(-MAX_DATA_POINTS);
+    }
+
+    c.update("default");
+  });
+
+  useLayoutEffect(() => {
+    return () => {
+      chartjsRef.current?.destroy();
+    };
+  }, []);
+
+  if (!isAllowedCryptoSymbol(state.selectedSource)) return null;
+
+  return (
+    <div className={classes.priceChartRoot}>
+      <canvas ref={setChartRef} />
+    </div>
+  );
+}
+
+function pickColorForSource(source: DataSourcesCrypto): string {
+  const palette: Partial<Record<DataSourcesCrypto, string>> = {
+    binance: "red",
+    bybit: "blue",
+    coinbase: "green",
+    okx: "orange",
+    pyth: "purple",
+    pythlazer: "teal",
+  };
+  return palette[source] ?? "gray";
+}

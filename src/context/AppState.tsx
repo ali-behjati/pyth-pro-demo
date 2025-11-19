@@ -12,7 +12,7 @@ import type {
   PriceData,
 } from "../types";
 
-type AppStateContextVal = CurrentPricesState & {
+export type AppStateContextVal = CurrentPricesState & {
   addDataPoint: (
     dataSource: DataSourcesCrypto,
     symbol: AllowedCryptoSymbolsType,
