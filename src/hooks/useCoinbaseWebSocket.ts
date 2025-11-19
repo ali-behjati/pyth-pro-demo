@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 
 import type { PriceData } from "../types";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -43,11 +42,7 @@ type CoinbaseLevel2Snapshot = {
 
 export const useCoinbaseWebSocket = (
   onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
 ) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
-
   // Maintain local orderbook state for best bid/ask
   const orderbookRef = useRef<{
     bids: Map<string, string>; // price -> quantity
@@ -90,6 +85,7 @@ export const useCoinbaseWebSocket = (
     [],
   );
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const data = JSON.parse(e.data) as Partial<{
       channel: string;
       events: CoinbaseAdvancedTradeLevel2Message["events"];
@@ -196,31 +192,6 @@ export const useCoinbaseWebSocket = (
     "wss://advanced-trade-ws.coinbase.com",
     { onOpen, onMessage },
   );
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
 
   return {
     isConnected: status === "connected",

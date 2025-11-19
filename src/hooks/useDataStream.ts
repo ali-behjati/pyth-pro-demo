@@ -1,0 +1,106 @@
+import { useCallback } from "react";
+
+import type { AllowedCryptoSymbolsType, DataSourcesCrypto } from "../types";
+import { useBinanceWebSocket } from "./useBinanceWebSocket";
+import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
+import type { UseWebSocketOpts } from "./useWebSocket";
+import { useWebSocket } from "./useWebSocket";
+import { isNullOrUndefined } from "../util";
+
+const PYTH_LAZER_ENDPOINT = "wss://pyth-lazer.dourolabs.app/v1/stream";
+const PYTH_LAZER_AUTH_TOKEN = import.meta.env.VITE_PYTH_LAZER_AUTH_TOKEN;
+
+function getUrlForSymbolAndDataSource(
+  symbol: AllowedCryptoSymbolsType,
+  dataSource: DataSourcesCrypto,
+) {
+  switch (symbol) {
+    case "BTCUSDT":
+    case "ETHUSDT": {
+      switch (dataSource) {
+        case "binance": {
+          return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@bookTicker`;
+        }
+        case "bybit": {
+          return "wss://stream.bybit.com/v5/public/spot";
+        }
+        case "coinbase": {
+          return "wss://advanced-trade-ws.coinbase.com";
+        }
+        case "okx": {
+          return "wss://ws.okx.com:8443/ws/v5/public";
+        }
+        case "pyth": {
+          return "wss://hermes.pyth.network/ws";
+        }
+        case "pythlazer": {
+          return `${PYTH_LAZER_ENDPOINT}?${PYTH_LAZER_AUTH_TOKEN}`;
+        }
+      }
+    }
+  }
+}
+
+type UseDataStreamOpts = {
+  dataSource: DataSourcesCrypto;
+  enabled?: boolean;
+  symbol: AllowedCryptoSymbolsType;
+};
+
+/**
+ * abstraction around setting up the streaming websocket
+ * and getting price updates from various sources
+ */
+export function useDataStream({
+  dataSource,
+  enabled = true,
+  symbol,
+}: UseDataStreamOpts) {
+  /** queries */
+  const { usdtToUsdRate } = useFetchUsdtToUsdRate({ enabled });
+
+  /** hooks */
+  const { onMessage: binanceOnMessage } = useBinanceWebSocket();
+
+  /** callbacks */
+  const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+    const strData = String(e.data);
+    switch (symbol) {
+      case "BTCUSDT":
+      case "ETHUSDT": {
+        switch (dataSource) {
+          case "binance": {
+            if (!isNullOrUndefined(usdtToUsdRate)) {
+              binanceOnMessage(usdtToUsdRate, strData);
+            }
+            break;
+          }
+        }
+      }
+    }
+  }, []);
+
+  const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(() => {
+    switch (symbol) {
+      case "BTCUSDT":
+      case "ETHUSDT": {
+        switch (dataSource) {
+          default: {
+            break;
+          }
+        }
+      }
+    }
+  }, []);
+
+  /** websocket */
+  const { status } = useWebSocket(
+    getUrlForSymbolAndDataSource(symbol, dataSource),
+    {
+      onMessage,
+      onOpen,
+    },
+  );
+
+  return { status };
+}

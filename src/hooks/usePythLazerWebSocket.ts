@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useEffect, useCallback, useRef } from "react";
+import { useCallback } from "react";
 
 import type { PriceData } from "../types";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -24,11 +23,7 @@ const BTC_PRICE_FEED_ID = 1;
 
 export const usePythLazerWebSocket = (
   onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
 ) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
-
   /** callbacks */
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (socket) => {
@@ -46,6 +41,7 @@ export const usePythLazerWebSocket = (
     [],
   );
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const data = JSON.parse(e.data) as Partial<
       PythLazerStreamUpdate & { type: string }
     >;
@@ -80,32 +76,6 @@ export const usePythLazerWebSocket = (
       onOpen,
     },
   );
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
 
   return {
     isConnected: status === "connected",

@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useEffect, useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useShallow } from "zustand/shallow";
 
-import type { PriceData } from "../types";
-import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
-import type { UseWebSocketOpts } from "./useWebSocket";
-import { useWebSocket } from "./useWebSocket";
+import { usePythProStore } from "../state";
+import { isAllowedCryptoSymbol } from "../types";
 
 type BinanceOrderBookData = {
   s: string; // symbol
@@ -14,18 +12,17 @@ type BinanceOrderBookData = {
   A: string; // best ask quantity
 };
 
-export const useBinanceWebSocket = (
-  onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
-) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
+export function useBinanceWebSocket() {
+  /** store */
+  const addPriceEntry = usePythProStore(
+    useShallow((state) => state.addPriceEntry),
+  );
 
   /** callbacks */
-  const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+  const onMessage = useCallback((usdtToUsdRate: number, socketData: string) => {
     try {
-      const data = JSON.parse(e.data) as BinanceOrderBookData;
-      if (data.s === "BTCUSDT") {
+      const data = JSON.parse(socketData) as BinanceOrderBookData;
+      if (isAllowedCryptoSymbol(data.s)) {
         // Calculate mid price from best bid and best ask
         const bestBid = Number.parseFloat(data.b);
         const bestAsk = Number.parseFloat(data.a);
@@ -34,7 +31,7 @@ export const useBinanceWebSocket = (
         // Convert USDT to USD using the fetched rate
         const midPriceUSD = midPriceUSDT * usdtToUsdRate;
 
-        onPriceUpdate({
+        addPriceEntry(data.s, "binance", {
           price: midPriceUSD,
           timestamp: Date.now(),
           source: "binance",
@@ -45,41 +42,5 @@ export const useBinanceWebSocket = (
     }
   }, []);
 
-  /** hooks */
-  const { usdtToUsdRate } = useFetchUsdtToUsdRate({ refetchInterval: 10_000 });
-  const { close, reconnect, status } = useWebSocket(
-    "wss://stream.binance.com:9443/ws/btcusdt@bookTicker",
-    { onMessage },
-  );
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
-
-  return {
-    isConnected: status === "connected",
-    reconnect,
-    disconnect: close,
-  };
-};
+  return { onMessage };
+}

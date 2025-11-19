@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 
 import type { PriceData } from "../types";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -29,15 +28,10 @@ const BTC_USD_PRICE_FEED_ID =
   "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
 const WS_URL = "wss://hermes.pyth.network/ws";
 
-export const usePythWebSocket = (
-  onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
-) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
-
+export const usePythWebSocket = (onPriceUpdate: (data: PriceData) => void) => {
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const data = JSON.parse(e.data) as Partial<
       PythPriceUpdateMessage & { result: string }
     >;
@@ -82,32 +76,6 @@ export const usePythWebSocket = (
     onMessage,
     onOpen,
   });
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
 
   return {
     isConnected: status === "connected",

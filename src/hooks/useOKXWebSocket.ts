@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback } from "react";
 
 import type { PriceData } from "../types";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
@@ -18,13 +17,7 @@ type OKXBBOData = {
   }[];
 };
 
-export const useOKXWebSocket = (
-  onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
-) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
-
+export const useOKXWebSocket = (onPriceUpdate: (data: PriceData) => void) => {
   /** hooks */
   const { usdtToUsdRate } = useFetchUsdtToUsdRate({ refetchInterval: 10_000 });
 
@@ -46,6 +39,7 @@ export const useOKXWebSocket = (
   );
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const data = JSON.parse(e.data) as Partial<OKXBBOData>;
 
       // Handle best bid/offer updates
@@ -85,31 +79,6 @@ export const useOKXWebSocket = (
       onMessage,
     },
   );
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
 
   return {
     isConnected: status === "connected",

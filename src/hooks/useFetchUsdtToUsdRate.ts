@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
+import type { Nullish } from "../types";
+
 type UseFetchUsdtToUsdRateOpts = {
+  enabled?: boolean;
   refetchInterval?: number;
   url?: string;
 };
@@ -8,6 +11,7 @@ type UseFetchUsdtToUsdRateOpts = {
 export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
   /** props */
   const {
+    enabled = true,
     refetchInterval,
     url = "https://hermes.pyth.network/v2/updates/price/latest?ids%5B%5D=2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
   } = opts ?? {};
@@ -16,7 +20,7 @@ export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
   const abortSignalRef = useRef<AbortController | undefined>(undefined);
 
   /** state */
-  const [usdtToUsdRate, setUsdtToUsdRate] = useState(1);
+  const [usdtToUsdRate, setUsdtToUsdRate] = useState<Nullish<number>>(null);
   const [fetchTime, setFetchTime] = useState(0);
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -25,6 +29,8 @@ export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
     if (abortSignalRef.current) {
       abortSignalRef.current.abort();
     }
+
+    if (!enabled) return;
 
     const a = new AbortController();
     abortSignalRef.current = a;
@@ -40,10 +46,10 @@ export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
     return () => {
       abortSignalRef.current?.abort();
     };
-  }, [fetchTime]);
+  }, [enabled, fetchTime]);
 
   useEffect(() => {
-    if (!refetchInterval) return;
+    if (!refetchInterval || !enabled) return;
 
     const t = setTimeout(() => {
       setFetchTime(Date.now());
@@ -51,7 +57,7 @@ export function useFetchUsdtToUsdRate(opts?: UseFetchUsdtToUsdRateOpts) {
     return () => {
       clearTimeout(t);
     };
-  }, [refetchInterval]);
+  }, [enabled, refetchInterval]);
 
   return { usdtToUsdRate, error };
 }

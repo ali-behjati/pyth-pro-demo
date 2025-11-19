@@ -28,7 +28,14 @@ export type UseWebSocketOpts = {
 
 export function useWebSocket(
   url: string,
-  { enabled = true, ...opts }: UseWebSocketOpts,
+  {
+    enabled = true,
+    onClose,
+    onError,
+    onMessage,
+    onOpen,
+    onReconnect,
+  }: UseWebSocketOpts,
 ) {
   /** state */
   const [status, setStatus] = useState<
@@ -37,11 +44,11 @@ export function useWebSocket(
 
   /** refs */
   const wsRef = useRef<Sockette | undefined>(undefined);
-  const onCloseRef = useRef(opts.onClose);
-  const onErrorRef = useRef(opts.onError);
-  const onMessageRef = useRef(opts.onMessage);
-  const onOpenRef = useRef(opts.onOpen);
-  const onReconnectRef = useRef(opts.onReconnect);
+  const onCloseRef = useRef(onClose);
+  const onErrorRef = useRef(onError);
+  const onMessageRef = useRef(onMessage);
+  const onOpenRef = useRef(onOpen);
+  const onReconnectRef = useRef(onReconnect);
 
   /** callbacks */
   const connectSocket = useCallback(() => {
@@ -69,6 +76,8 @@ export function useWebSocket(
       },
     });
 
+    setStatus("connecting");
+
     wsRef.current = w;
   }, [url]);
 
@@ -79,11 +88,11 @@ export function useWebSocket(
 
   /** effects */
   useEffect(() => {
-    onCloseRef.current = opts.onClose;
-    onErrorRef.current = opts.onError;
-    onMessageRef.current = opts.onMessage;
-    onOpenRef.current = opts.onOpen;
-    onReconnectRef.current = opts.onReconnect;
+    onCloseRef.current = onClose;
+    onErrorRef.current = onError;
+    onMessageRef.current = onMessage;
+    onOpenRef.current = onOpen;
+    onReconnectRef.current = onReconnect;
   });
 
   useEffect(() => {

@@ -1,59 +1,59 @@
+import type { ArrayValues } from "type-fest";
+
+export type Nullish<T> = T | null | undefined;
+
+export const ALLOWED_CRYPTO_SYMBOLS = ["BTCUSDT", "ETHUSDT"] as const;
+
+export type AllowedCryptoSymbolsType = ArrayValues<
+  typeof ALLOWED_CRYPTO_SYMBOLS
+>;
+
+export function isAllowedCryptoSymbol(
+  symbol: string,
+): symbol is AllowedCryptoSymbolsType {
+  for (const s of ALLOWED_CRYPTO_SYMBOLS) {
+    if (s === symbol) return true;
+  }
+
+  return false;
+}
+
+export type DataSourcesCrypto =
+  | "binance"
+  | "coinbase"
+  | "pyth"
+  | "pythlazer"
+  | "okx"
+  | "bybit";
+
 export type PriceData = {
   price: number;
+  source: DataSourcesCrypto;
   timestamp: number;
-  source: "binance" | "coinbase" | "pyth" | "pythlazer" | "okx" | "bybit";
 };
 
 export type PricePoint = {
-  timestamp: number;
   binance?: Nullish<number>;
+  bybit?: Nullish<number>;
   coinbase?: Nullish<number>;
+  okx?: Nullish<number>;
   pyth?: Nullish<number>;
   pythlazer?: Nullish<number>;
-  okx?: Nullish<number>;
-  bybit?: Nullish<number>;
+  timestamp: number;
 };
 
-export type ExchangeStatus = {
-  binance: "connected" | "disconnected" | "connecting";
-  coinbase: "connected" | "disconnected" | "connecting";
-  pyth: "connected" | "disconnected" | "connecting";
-  pythlazer: "connected" | "disconnected" | "connecting";
-  okx: "connected" | "disconnected" | "connecting";
-  bybit: "connected" | "disconnected" | "connecting";
+export type CurrentPriceMetrics = {
+  change: Nullish<number>;
+  changePercent: Nullish<number>;
+  data: PricePoint[];
+  price: Nullish<number>;
 };
 
-export type CurrentPrices = {
-  binance: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-  coinbase: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-  pyth: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-  pythlazer: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-  okx: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-  bybit: {
-    price: number;
-    change: number;
-    changePercent: number;
-  } | null;
-};
+export type CurrentCryptoPriceState = Record<
+  DataSourcesCrypto,
+  Nullish<CurrentPriceMetrics>
+>;
 
-export type Nullish<T> = T | null | undefined;
+export type CurrentPricesState = {
+  state: Record<AllowedCryptoSymbolsType, CurrentCryptoPriceState>;
+};

@@ -1,11 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
-import type {
-  PriceData,
-  PricePoint,
-  CurrentPrices,
-  ExchangeStatus,
-} from "../types";
+import type { PriceData, PricePoint, CurrentPrices } from "../types";
 
 const CHART_DATA_WINDOW = 60 * 1000; // 1 minute in milliseconds
 const MAX_DATA_POINTS = 3000; // Maximum points to keep (increased for real-time updates)
@@ -20,14 +15,6 @@ export const usePriceDataManager = () => {
     pythlazer: null,
     okx: null,
     bybit: null,
-  });
-  const [exchangeStatus, setExchangeStatus] = useState<ExchangeStatus>({
-    binance: "disconnected",
-    coinbase: "disconnected",
-    pyth: "disconnected",
-    pythlazer: "disconnected",
-    okx: "disconnected",
-    bybit: "disconnected",
   });
 
   // Store previous prices for change calculation
@@ -128,20 +115,6 @@ export const usePriceDataManager = () => {
     [updateChartData],
   );
 
-  // Handle exchange status changes
-  const handleStatusChange = useCallback(
-    (
-      source: keyof ExchangeStatus,
-      status: "connected" | "disconnected" | "connecting",
-    ) => {
-      setExchangeStatus((prev) => ({
-        ...prev,
-        [source]: status,
-      }));
-    },
-    [],
-  );
-
   // No longer needed - we update in real-time now
 
   // Clean up old data periodically
@@ -163,8 +136,6 @@ export const usePriceDataManager = () => {
   return {
     chartData,
     currentPrices,
-    exchangeStatus,
     handlePriceUpdate,
-    handleStatusChange,
   };
 };

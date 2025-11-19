@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback } from "react";
 
 import type { PriceData } from "../types";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
 import type { UseWebSocketOpts } from "./useWebSocket";
 import { useWebSocket } from "./useWebSocket";
+import { isNullOrUndefined } from "../util";
 
 type BybitOrderBookData = {
   topic: string;
@@ -19,13 +19,7 @@ type BybitOrderBookData = {
   };
 };
 
-export const useBybitWebSocket = (
-  onPriceUpdate: (data: PriceData) => void,
-  onStatusChange: (status: "connected" | "disconnected" | "connecting") => void,
-) => {
-  /** refs */
-  const onStatusChangeRef = useRef(onStatusChange);
-
+export const useBybitWebSocket = (onPriceUpdate: (data: PriceData) => void) => {
   /** callbacks */
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (socket) => {
@@ -38,6 +32,7 @@ export const useBybitWebSocket = (
     [],
   );
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>((_, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const data = JSON.parse(e.data) as Partial<
       BybitOrderBookData & { topic: string; type: string }
     >;
@@ -57,13 +52,15 @@ export const useBybitWebSocket = (
         const midPriceUSDT = (bestBid + bestAsk) / 2;
 
         // Convert USDT to USD using the fetched rate
-        const midPriceUSD = midPriceUSDT * usdtToUsdRate;
+        if (!isNullOrUndefined(usdtToUsdRate)) {
+          const midPriceUSD = midPriceUSDT * usdtToUsdRate;
 
-        onPriceUpdate({
-          price: midPriceUSD,
-          timestamp: Date.now(),
-          source: "bybit",
-        });
+          onPriceUpdate({
+            price: midPriceUSD,
+            timestamp: Date.now(),
+            source: "bybit",
+          });
+        }
       }
     }
   }, []);
@@ -74,31 +71,6 @@ export const useBybitWebSocket = (
     "wss://stream.bybit.com/v5/public/spot",
     { onMessage, onOpen },
   );
-
-  /** effects */
-  useEffect(() => {
-    onStatusChangeRef.current = onStatusChange;
-  });
-  useEffect(() => {
-    switch (status) {
-      case "closed": {
-        onStatusChangeRef.current("disconnected");
-        return;
-      }
-      case "connected": {
-        onStatusChangeRef.current("connected");
-        return;
-      }
-      case "connecting":
-      case "reconnecting": {
-        onStatusChangeRef.current("connecting");
-        return;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [status]);
 
   return {
     isConnected: status === "connected",

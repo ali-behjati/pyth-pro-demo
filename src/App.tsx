@@ -1,49 +1,13 @@
 import React from "react";
 
-import PriceCard from "./components/PriceCard";
-import PriceChart from "./components/PriceChart";
-import { useBinanceWebSocket } from "./hooks/useBinanceWebSocket";
-import { useBybitWebSocket } from "./hooks/useBybitWebSocket";
-import { useCoinbaseWebSocket } from "./hooks/useCoinbaseWebSocket";
-import { useOKXWebSocket } from "./hooks/useOKXWebSocket";
-import { usePriceDataManager } from "./hooks/usePriceDataManager";
-import { usePythLazerWebSocket } from "./hooks/usePythLazerWebSocket";
-import { usePythWebSocket } from "./hooks/usePythWebSocket";
+import { PriceCard } from "./components/PriceCard";
+import { useDataStream } from "./hooks/useDataStream";
 
-const NOOP = () => {};
-
-const App: React.FC = () => {
-  const {
-    chartData,
-    currentPrices,
-    exchangeStatus,
-    handlePriceUpdate,
-    handleStatusChange,
-  } = usePriceDataManager();
-
-  // Initialize WebSocket connections
-  useBinanceWebSocket(NOOP, (status) => {
-    handleStatusChange("binance", status);
-  });
-
-  useCoinbaseWebSocket(NOOP, (status) => {
-    handleStatusChange("coinbase", status);
-  });
-
-  usePythWebSocket(NOOP, (status) => {
-    handleStatusChange("pyth", status);
-  });
-
-  usePythLazerWebSocket(NOOP, (status) => {
-    handleStatusChange("pythlazer", status);
-  });
-
-  useOKXWebSocket(NOOP, (status) => {
-    handleStatusChange("okx", status);
-  });
-
-  useBybitWebSocket(NOOP, (status) => {
-    handleStatusChange("bybit", status);
+export function App() {
+  /** hooks */
+  const { status: binanceStatus } = useDataStream({
+    dataSource: "binance",
+    symbol: "BTCUSDT",
   });
 
   return (
@@ -63,50 +27,49 @@ const App: React.FC = () => {
 
       <div className="price-cards">
         <PriceCard
+          dataSource="binance"
+          symbol="BTCUSDT"
+          status={binanceStatus}
+        />
+        {/* <PriceCard
           exchangeName="Binance"
           price={currentPrices.binance?.price}
           change={currentPrices.binance?.change}
           changePercent={currentPrices.binance?.changePercent}
-          status={exchangeStatus.binance}
         />
         <PriceCard
           exchangeName="Coinbase"
           price={currentPrices.coinbase?.price}
           change={currentPrices.coinbase?.change}
           changePercent={currentPrices.coinbase?.changePercent}
-          status={exchangeStatus.coinbase}
         />
         <PriceCard
           exchangeName="Pyth Core"
           price={currentPrices.pyth?.price}
           change={currentPrices.pyth?.change}
           changePercent={currentPrices.pyth?.changePercent}
-          status={exchangeStatus.pyth}
         />
         <PriceCard
           exchangeName="Pyth Pro"
           price={currentPrices.pythlazer?.price}
           change={currentPrices.pythlazer?.change}
           changePercent={currentPrices.pythlazer?.changePercent}
-          status={exchangeStatus.pythlazer}
         />
         <PriceCard
           exchangeName="OKX"
           price={currentPrices.okx?.price}
           change={currentPrices.okx?.change}
           changePercent={currentPrices.okx?.changePercent}
-          status={exchangeStatus.okx}
         />
         <PriceCard
           exchangeName="Bybit"
           price={currentPrices.bybit?.price}
           change={currentPrices.bybit?.change}
           changePercent={currentPrices.bybit?.changePercent}
-          status={exchangeStatus.bybit}
-        />
+        /> */}
       </div>
 
-      <PriceChart data={chartData} />
+      {/* <PriceChart data={chartData} /> */}
 
       <div
         style={{
@@ -139,6 +102,4 @@ const App: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default App;
+}
