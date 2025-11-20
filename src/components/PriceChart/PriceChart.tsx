@@ -14,9 +14,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import classes from "./PriceChart.module.css";
 import { MAX_DATA_AGE, MAX_DATA_POINTS } from "../../constants";
 import { useAppStateContext } from "../../context";
-import type { DataSourcesCrypto, Nullish } from "../../types";
+import type { Nullish } from "../../types";
 import { DATA_SOURCES_CRYPTO, isAllowedCryptoSymbol } from "../../types";
-import { isNullOrUndefined } from "../../util";
+import { getColorForDataSource, isNullOrUndefined } from "../../util";
 
 Chart.register(
   CategoryScale,
@@ -28,6 +28,8 @@ Chart.register(
   Legend,
   TimeScale,
 );
+
+type ChartJSPoint = { x: number; y: number };
 
 export function PriceChart() {
   /** context */
@@ -90,26 +92,33 @@ export function PriceChart() {
       if (!ds) {
         ds = {
           data: [],
-          borderColor: pickColorForSource(dataSource),
+          borderColor: getColorForDataSource(dataSource),
           label: dataSource,
           pointBorderWidth: 1,
           pointRadius: 0,
           pointHoverRadius: 0,
+          tension: 0.2,
         };
         c.data.datasets.push(ds);
       }
+
+      const lastDataPoint = ds.data.at(-1) as Nullish<ChartJSPoint>;
+      const latestMetricIsFresh =
+        !lastDataPoint || lastDataPoint.x !== symbolMetrics.timestamp;
+
+      if (!latestMetricIsFresh) return;
 
       ds.data.push({ x: symbolMetrics.timestamp, y: symbolMetrics.price });
 
       const end = symbolMetrics.timestamp;
       const start = end - MAX_DATA_AGE;
 
-      ds.data = (ds.data as { x: number; y: number }[])
+      ds.data = (ds.data as ChartJSPoint[])
         .filter((d) => d.x >= start && d.x <= end)
         .slice(-MAX_DATA_POINTS);
     }
 
-    c.update("default");
+    c.update();
   });
 
   useLayoutEffect(() => {
@@ -125,16 +134,4 @@ export function PriceChart() {
       <canvas ref={setChartRef} />
     </div>
   );
-}
-
-function pickColorForSource(source: DataSourcesCrypto): string {
-  const palette: Partial<Record<DataSourcesCrypto, string>> = {
-    binance: "red",
-    bybit: "blue",
-    coinbase: "green",
-    okx: "orange",
-    pyth: "purple",
-    pythlazer: "teal",
-  };
-  return palette[source] ?? "gray";
 }

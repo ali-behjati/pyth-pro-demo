@@ -115,7 +115,7 @@ export function App() {
         )}
       </div>
 
-      <PriceChart />
+      <PriceChart key={selectedSource} />
 
       <div
         style={{
