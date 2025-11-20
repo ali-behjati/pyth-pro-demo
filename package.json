@@ -22,13 +22,15 @@
     "recharts": "^3.4.1",
     "sockette": "^2.0.6",
     "throttleit": "^2.1.0",
-    "type-fest": "^5.2.0"
+    "type-fest": "^5.2.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@cprussin/eslint-config": "^5.0.0",
     "@cprussin/tsconfig": "^4.0.1",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
+    "@types/node": "^24",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.22",
     "typescript": "^5.9.3",

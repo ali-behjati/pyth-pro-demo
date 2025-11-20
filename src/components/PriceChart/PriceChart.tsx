@@ -1,3 +1,4 @@
+import { capitalCase } from "change-case";
 import {
   CategoryScale,
   Chart,
@@ -15,7 +16,7 @@ import classes from "./PriceChart.module.css";
 import { MAX_DATA_AGE, MAX_DATA_POINTS } from "../../constants";
 import { useAppStateContext } from "../../context";
 import type { Nullish } from "../../types";
-import { DATA_SOURCES_CRYPTO } from "../../types";
+import { ALL_DATA_SOURCES } from "../../types";
 import {
   getColorForDataSource,
   isAllowedSymbol,
@@ -69,7 +70,23 @@ export function PriceChart() {
           y: { type: "linear", beginAtZero: false, grid: { display: true } },
         },
         plugins: {
-          legend: { display: true, labels: { usePointStyle: true } },
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: (chart) => {
+                // Start with the default labels
+                const original =
+                  Chart.defaults.plugins.legend.labels.generateLabels(chart);
+
+                // Map them to whatever text you want
+                return original.map((label) => ({
+                  ...label,
+                  text: capitalCase(label.text),
+                }));
+              },
+              usePointStyle: true,
+            },
+          },
           tooltip: { enabled: false },
         },
       },
@@ -82,7 +99,7 @@ export function PriceChart() {
     if (!chartjsRef.current || !state.selectedSource) return;
     const { current: c } = chartjsRef;
 
-    for (const dataSource of DATA_SOURCES_CRYPTO) {
+    for (const dataSource of ALL_DATA_SOURCES) {
       const latest = state[dataSource].latest;
       const symbolMetrics = latest?.[state.selectedSource];
       if (

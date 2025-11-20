@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import type { AllAllowedSymbols, AllDataSourcesType, Nullish } from "../types";
+import { useAllTickWebSocket } from "./useAllTickWebSocket";
 import { useBinanceWebSocket } from "./useBinanceWebSocket";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -11,7 +12,11 @@ import { useCoinbaseWebSocket } from "./useCoinbaseWebSocket";
 import { useOKXWebSocket } from "./useOKXWebSocket";
 import { usePythLazerWebSocket } from "./usePythLazerWebSocket";
 import { usePythWebSocket } from "./usePythWebSocket";
-import { API_TOKEN_PYTH_LAZER, PYTH_LAZER_ENDPOINT } from "../constants";
+import {
+  API_TOKEN_ALLTICK_API,
+  API_TOKEN_PYTH_LAZER,
+  PYTH_LAZER_ENDPOINT,
+} from "../constants";
 import { usePrimeApiWebSocket } from "./usePrimeApiWebSocket";
 
 function getUrlForSymbolAndDataSource(
@@ -21,6 +26,24 @@ function getUrlForSymbolAndDataSource(
   if (!symbol) return null;
 
   switch (dataSource) {
+    case "alltick": {
+      return `wss://quote.alltick.co/quote-b-ws-api?token=${API_TOKEN_ALLTICK_API}`;
+    }
+    case "binance": {
+      return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@bookTicker`;
+    }
+    case "bybit": {
+      return `wss://stream.bybit.com/v5/public/spot?__cachebust=${symbol.toLowerCase()}`;
+    }
+    case "coinbase": {
+      return `wss://advanced-trade-ws.coinbase.com?__cachebust=${symbol.toLowerCase()}`;
+    }
+    case "okx": {
+      return `wss://ws.okx.com:8443/ws/v5/public?__cachebust=${symbol.toLowerCase()}`;
+    }
+    case "prime_api": {
+      return "wss://euc2.primeapi.io/";
+    }
     case "pyth": {
       return `wss://hermes.pyth.network/ws?__cachebust=${symbol.toLowerCase()}`;
     }
@@ -29,40 +52,6 @@ function getUrlForSymbolAndDataSource(
     }
     default: {
       break;
-    }
-  }
-
-  switch (symbol) {
-    case "BTCUSDT":
-    case "ETHUSDT": {
-      switch (dataSource) {
-        case "binance": {
-          return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@bookTicker`;
-        }
-        case "bybit": {
-          return `wss://stream.bybit.com/v5/public/spot?__cachebust=${symbol.toLowerCase()}`;
-        }
-        case "coinbase": {
-          return `wss://advanced-trade-ws.coinbase.com?__cachebust=${symbol.toLowerCase()}`;
-        }
-        case "okx": {
-          return `wss://ws.okx.com:8443/ws/v5/public?__cachebust=${symbol.toLowerCase()}`;
-        }
-        default: {
-          break;
-        }
-      }
-      break;
-    }
-    case "EURUSD": {
-      switch (dataSource) {
-        case "prime_api": {
-          return "wss://euc2.primeapi.io/";
-        }
-        default: {
-          break;
-        }
-      }
     }
   }
 
@@ -99,6 +88,8 @@ export function useDataStream({
     usePythLazerWebSocket();
   const { onMessage: primeApiOnMessage, onOpen: primeApiOnOpen } =
     usePrimeApiWebSocket();
+  const { onMessage: alltickOnMessage, onOpen: alltickOnOpen } =
+    useAllTickWebSocket();
 
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
@@ -107,6 +98,30 @@ export function useDataStream({
       const strData = String(e.data);
 
       switch (dataSource) {
+        case "alltick": {
+          alltickOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "binance": {
+          binanceOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "bybit": {
+          bybitOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "coinbase": {
+          coinbaseOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "okx": {
+          okxOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "prime_api": {
+          primeApiOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
         case "pyth": {
           pythOnMessage(s, usdtToUsdRate, strData);
           break;
@@ -119,46 +134,12 @@ export function useDataStream({
           break;
         }
       }
-
-      switch (symbol) {
-        case "BTCUSDT":
-        case "ETHUSDT": {
-          switch (dataSource) {
-            case "binance": {
-              binanceOnMessage(s, usdtToUsdRate, strData);
-              break;
-            }
-            case "bybit": {
-              bybitOnMessage(s, usdtToUsdRate, strData);
-              break;
-            }
-            case "coinbase": {
-              coinbaseOnMessage(s, usdtToUsdRate, strData);
-              break;
-            }
-            case "okx": {
-              okxOnMessage(s, usdtToUsdRate, strData);
-              break;
-            }
-          }
-          break;
-        }
-        case "EURUSD": {
-          switch (dataSource) {
-            case "prime_api": {
-              primeApiOnMessage(s, usdtToUsdRate, strData);
-              break;
-            }
-            default: {
-              break;
-            }
-          }
-        }
-      }
     },
     [
+      alltickOnMessage,
       binanceOnMessage,
       bybitOnMessage,
+      dataSource,
       okxOnMessage,
       primeApiOnMessage,
       pythOnMessage,
@@ -170,7 +151,29 @@ export function useDataStream({
 
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (...args) => {
+      console.info("");
+
       switch (dataSource) {
+        case "alltick": {
+          alltickOnOpen?.(...args);
+          break;
+        }
+        case "bybit": {
+          bybitOnOpen?.(...args);
+          break;
+        }
+        case "coinbase": {
+          coinbaseOnOpen?.(...args);
+          break;
+        }
+        case "okx": {
+          okxOnOpen?.(...args);
+          break;
+        }
+        case "prime_api": {
+          primeApiOnOpen?.(...args);
+          break;
+        }
         case "pyth": {
           pythOnOpen?.(...args);
           break;
@@ -183,45 +186,12 @@ export function useDataStream({
           break;
         }
       }
-
-      switch (symbol) {
-        case "BTCUSDT":
-        case "ETHUSDT": {
-          switch (dataSource) {
-            case "bybit": {
-              bybitOnOpen?.(...args);
-              break;
-            }
-            case "coinbase": {
-              coinbaseOnOpen?.(...args);
-              break;
-            }
-            case "okx": {
-              okxOnOpen?.(...args);
-              break;
-            }
-            default: {
-              break;
-            }
-          }
-          break;
-        }
-        case "EURUSD": {
-          switch (dataSource) {
-            case "prime_api": {
-              primeApiOnOpen?.(...args);
-              break;
-            }
-            default: {
-              break;
-            }
-          }
-        }
-      }
     },
     [
+      alltickOnOpen,
       bybitOnOpen,
       coinbaseOnOpen,
+      dataSource,
       okxOnOpen,
       primeApiOnOpen,
       pythOnOpen,

@@ -4,7 +4,11 @@ import React from "react";
 import { PriceCard } from "./components/PriceCard";
 import { PriceChart } from "./components/PriceChart";
 import { SourceSelector } from "./components/SourceSelector";
-import { API_TOKEN_PRIME_API, API_TOKEN_PYTH_LAZER } from "./constants";
+import {
+  API_TOKEN_ALLTICK_API,
+  API_TOKEN_PRIME_API,
+  API_TOKEN_PYTH_LAZER,
+} from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
 import { DATA_SOURCES_CRYPTO } from "./types";
@@ -67,6 +71,13 @@ export function App() {
     symbol: selectedSource,
   });
 
+  const { status: alltickStatus } = useDataStream({
+    dataSource: "alltick",
+    enabled:
+      isAllowedForexSymbol(selectedSource) && Boolean(API_TOKEN_ALLTICK_API),
+    symbol: selectedSource,
+  });
+
   return (
     <div className="app-container">
       <div className="header">
@@ -97,6 +108,7 @@ export function App() {
         )}
         {isForexSource && (
           <>
+            <PriceCard dataSource="alltick" status={alltickStatus} />
             <PriceCard dataSource="prime_api" status={primeApiStatus} />
           </>
         )}

@@ -31,9 +31,23 @@ export const DATA_SOURCES_CRYPTO = [
 
 export const DATA_SOURCES_EQUITY = ["pyth", "pyth_lazer"] as const;
 
-export const DATA_SOURCES_FOREX = ["pyth", "pyth_lazer", "prime_api"] as const;
+export const DATA_SOURCES_FOREX = [
+  "pyth",
+  "pyth_lazer",
+  "prime_api",
+  "alltick",
+] as const;
 
 export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer"] as const;
+
+export const ALL_DATA_SOURCES = [
+  ...new Set([
+    ...DATA_SOURCES_CRYPTO,
+    ...DATA_SOURCES_EQUITY,
+    ...DATA_SOURCES_FOREX,
+    ...DATA_SOURCES_TREASURY,
+  ]),
+];
 
 export type AllowedCryptoSymbolsType = ArrayValues<
   typeof ALLOWED_CRYPTO_SYMBOLS
@@ -94,6 +108,15 @@ export type CurrentPricesState = Record<
 > & {
   selectedSource: Nullish<AllAllowedSymbols>;
 };
+
+export const ALL_SYMBOLS = [
+  ...new Set([
+    ...ALLOWED_CRYPTO_SYMBOLS,
+    ...ALLOWED_EQUITY_SYMBOLS,
+    ...ALLOWED_FOREX_SYMBOLS,
+    ...ALLOWED_TREASURY_SYMBOLS,
+  ]),
+];
 
 const SOURCE_SELECTOR_OPTS = [
   ...ALLOWED_CRYPTO_SYMBOLS.map((symbol) => ({

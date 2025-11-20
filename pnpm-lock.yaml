@@ -35,6 +35,9 @@ importers:
       type-fest:
         specifier: ^5.2.0
         version: 5.2.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
       '@cprussin/eslint-config':
         specifier: ^5.0.0
@@ -42,6 +45,9 @@ importers:
       '@cprussin/tsconfig':
         specifier: ^4.0.1
         version: 4.0.1(typescript@5.9.3)
+      '@types/node':
+        specifier: ^24
+        version: 24.10.1
       '@types/react':
         specifier: ^19.2.6
         version: 19.2.6
@@ -2701,6 +2707,10 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
@@ -5765,6 +5775,8 @@ snapshots:
     optional: true
 
   util-deprecate@1.0.2: {}
+
+  uuid@13.0.0: {}
 
   uuid@8.3.2: {}
 

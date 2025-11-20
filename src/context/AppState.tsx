@@ -27,6 +27,7 @@ const context = createContext<Nullish<AppStateContextVal>>(null);
 const emptyDataSourceResults: AllAndLatestDataState = { latest: {} };
 
 const initialState: CurrentPricesState = {
+  alltick: emptyDataSourceResults,
   binance: emptyDataSourceResults,
   bybit: emptyDataSourceResults,
   coinbase: emptyDataSourceResults,

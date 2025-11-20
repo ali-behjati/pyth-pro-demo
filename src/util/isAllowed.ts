@@ -11,6 +11,7 @@ import type {
   Nullish,
 } from "../types";
 import {
+  ALL_SYMBOLS,
   ALLOWED_CRYPTO_SYMBOLS,
   ALLOWED_EQUITY_SYMBOLS,
   ALLOWED_FOREX_SYMBOLS,
@@ -24,12 +25,7 @@ import {
 export function isAllowedSymbol(
   symbol: Nullish<string>,
 ): symbol is AllAllowedSymbols {
-  for (const s of [
-    ...ALLOWED_CRYPTO_SYMBOLS,
-    ...ALLOWED_EQUITY_SYMBOLS,
-    ...ALLOWED_FOREX_SYMBOLS,
-    ...ALLOWED_TREASURY_SYMBOLS,
-  ]) {
+  for (const s of ALL_SYMBOLS) {
     if (s === symbol) return true;
   }
 

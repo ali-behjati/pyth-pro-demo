@@ -88,10 +88,8 @@ export function usePrimeApiWebSocket(): UseDataProviderSocketHookReturnType {
     // whenever the user makes a new selection,
     // ensure the websocket has to go through the whole
     // procedure over again
-    if (!isAllowedForexSymbol(selectedSource)) {
-      subscriptionActive.current = false;
-      isAuthenticated.current = false;
-    }
+    subscriptionActive.current = false;
+    isAuthenticated.current = false;
   }, [selectedSource]);
 
   return { onOpen, onMessage };
