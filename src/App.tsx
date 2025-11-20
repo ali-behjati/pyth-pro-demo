@@ -1,5 +1,5 @@
 import { capitalCase } from "change-case";
-import React from "react";
+import React, { useMemo } from "react";
 
 import { PriceCard } from "./components/PriceCard";
 import { PriceChart } from "./components/PriceChart";
@@ -8,16 +8,23 @@ import {
   API_TOKEN_INFOWAY,
   API_TOKEN_PRIME_API,
   API_TOKEN_PYTH_LAZER,
+  API_TOKEN_TWELVE_DATA,
 } from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
-import { DATA_SOURCES_CRYPTO } from "./types";
+import {
+  DATA_SOURCES_CRYPTO,
+  DATA_SOURCES_EQUITY,
+  DATA_SOURCES_FOREX,
+  DATA_SOURCES_TREASURY,
+} from "./types";
 import {
   getColorForDataSource,
   isAllowedCryptoSymbol,
   isAllowedEquitySymbol,
   isAllowedForexSymbol,
   isAllowedSymbol,
+  isAllowedTreasurySymbol,
 } from "./util";
 
 export function App() {
@@ -82,6 +89,31 @@ export function App() {
     symbol: selectedSource,
   });
 
+  const { status: twelveStatus } = useDataStream({
+    dataSource: "twelve_data",
+    enabled:
+      (isAllowedForexSymbol(selectedSource) ||
+        isAllowedEquitySymbol(selectedSource)) &&
+      Boolean(API_TOKEN_TWELVE_DATA),
+    symbol: selectedSource,
+  });
+
+  const dataSourcesInUse = useMemo(() => {
+    if (isAllowedCryptoSymbol(selectedSource)) {
+      return [...DATA_SOURCES_CRYPTO];
+    }
+    if (isAllowedForexSymbol(selectedSource)) {
+      return [...DATA_SOURCES_FOREX];
+    }
+    if (isAllowedEquitySymbol(selectedSource)) {
+      return [...DATA_SOURCES_EQUITY];
+    }
+    if (isAllowedTreasurySymbol(selectedSource)) {
+      return [...DATA_SOURCES_TREASURY];
+    }
+    return [];
+  }, [selectedSource]);
+
   return (
     <div className="app-container">
       <div className="header">
@@ -111,7 +143,10 @@ export function App() {
           </>
         )}
         {(isForexSource || isEquitySource) && (
-          <PriceCard dataSource="infoway_io" status={infowayStatus} />
+          <>
+            <PriceCard dataSource="infoway_io" status={infowayStatus} />
+            <PriceCard dataSource="twelve_data" status={twelveStatus} />
+          </>
         )}
         {isForexSource && (
           <>
@@ -138,15 +173,14 @@ export function App() {
         {selectedSource && (
           <div className="data-sources-list">
             Data sources:
-            {isAllowedCryptoSymbol(selectedSource) &&
-              DATA_SOURCES_CRYPTO.map((source) => (
-                <span
-                  key={source}
-                  style={{ color: getColorForDataSource(source) }}
-                >
-                  {capitalCase(source)}
-                </span>
-              ))}
+            {dataSourcesInUse.toSorted().map((source) => (
+              <span
+                key={source}
+                style={{ color: getColorForDataSource(source) }}
+              >
+                {capitalCase(source)}
+              </span>
+            ))}
           </div>
         )}
       </div>

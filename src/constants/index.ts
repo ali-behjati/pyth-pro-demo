@@ -11,3 +11,4 @@ export const API_TOKEN_PYTH_LAZER = import.meta.env.VITE_API_TOKEN_PYTH_LAZER;
 
 export const API_TOKEN_PRIME_API = import.meta.env.VITE_API_TOKEN_PRIME_API;
 export const API_TOKEN_INFOWAY = import.meta.env.VITE_API_TOKEN_INFOWAY;
+export const API_TOKEN_TWELVE_DATA = import.meta.env.VITE_API_TOKEN_TWELVE_DATA;

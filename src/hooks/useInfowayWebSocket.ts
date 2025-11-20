@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type Sockette from "sockette";
 import { v4 as uuid } from "uuid";
 
@@ -105,6 +105,13 @@ export function useInfowayWebSocket(): UseDataProviderSocketHookReturnType {
     },
     [addDataPoint, selectedSource, startHeartbeat],
   );
+
+  /** effects */
+  useEffect(() => {
+    return () => {
+      clearHeartbeat();
+    };
+  }, [clearHeartbeat]);
 
   return { onMessage, onOpen };
 }

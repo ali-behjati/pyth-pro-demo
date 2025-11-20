@@ -4,10 +4,12 @@ const palette: Partial<Record<AllDataSourcesType, string>> = {
   binance: "red",
   bybit: "blue",
   coinbase: "green",
+  infoway_io: "aquamarine",
   okx: "orange",
   prime_api: "#ff4466",
   pyth: "purple",
   pyth_lazer: "teal",
+  twelve_data: "burlywood",
 };
 
 /**

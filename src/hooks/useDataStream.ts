@@ -14,10 +14,12 @@ import { usePythWebSocket } from "./usePythWebSocket";
 import {
   API_TOKEN_INFOWAY,
   API_TOKEN_PYTH_LAZER,
+  API_TOKEN_TWELVE_DATA,
   PYTH_LAZER_ENDPOINT,
 } from "../constants";
 import { usePrimeApiWebSocket } from "./usePrimeApiWebSocket";
 import { usePythLazerWebSocket } from "./usePythLazerWebSocket";
+import { useTwelveWebSocket } from "./useTwelveWebSocket";
 
 function getUrlForSymbolAndDataSource(
   dataSource: AllDataSourcesType,
@@ -51,6 +53,9 @@ function getUrlForSymbolAndDataSource(
     }
     case "pyth_lazer": {
       return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${API_TOKEN_PYTH_LAZER}&__cachebust=${symbol.toLowerCase()}`;
+    }
+    case "twelve_data": {
+      return `wss://ws.twelvedata.com/v1/quotes/price?apikey=${API_TOKEN_TWELVE_DATA}`;
     }
     default: {
       break;
@@ -92,6 +97,8 @@ export function useDataStream({
     usePrimeApiWebSocket();
   const { onMessage: infowayOnMessage, onOpen: infowayOnOpen } =
     useInfowayWebSocket();
+  const { onMessage: twelveOnMessage, onOpen: twelveOnOpen } =
+    useTwelveWebSocket();
 
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
@@ -132,6 +139,10 @@ export function useDataStream({
           pythLazerOnMessage(s, usdtToUsdRate, strData);
           break;
         }
+        case "twelve_data": {
+          twelveOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
         default: {
           break;
         }
@@ -147,14 +158,13 @@ export function useDataStream({
       pythOnMessage,
       pythLazerOnMessage,
       symbol,
+      twelveOnMessage,
       usdtToUsdRate,
     ],
   );
 
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (...args) => {
-      console.info("");
-
       switch (dataSource) {
         case "bybit": {
           bybitOnOpen?.(...args);
@@ -184,6 +194,10 @@ export function useDataStream({
           pythLazerOnOpen?.(...args);
           break;
         }
+        case "twelve_data": {
+          twelveOnOpen?.(...args);
+          break;
+        }
         default: {
           break;
         }
@@ -199,6 +213,7 @@ export function useDataStream({
       pythOnOpen,
       pythLazerOnOpen,
       symbol,
+      twelveOnOpen,
     ],
   );
 
