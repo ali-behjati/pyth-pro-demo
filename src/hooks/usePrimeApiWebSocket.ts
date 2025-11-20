@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { useCallback, useEffect, useRef } from "react";
 import type Sockette from "sockette";
 
@@ -50,34 +49,42 @@ export function usePrimeApiWebSocket(): UseDataProviderSocketHookReturnType {
   >(
     (s, _, strData) => {
       const parsed = JSON.parse(strData) as PrimeSocketResponse;
+
       if (parsed.op === "auth") {
-        isAuthenticated.current = parsed.msg === "Authenticated OK";
+        if (parsed.msg === "Authenticated OK") {
+          isAuthenticated.current = true;
+
+          // once authenticated, immediately subscribe
+          if (isAllowedForexSymbol(selectedSource)) {
+            const msg: PrimeSocketRequest = {
+              op: "subscribe",
+              pairs: [selectedSource],
+              stream: "fx",
+            };
+            s.json(msg);
+          }
+        }
+        return;
       }
-      if (!isAllowedForexSymbol(selectedSource)) return;
 
       if (
         parsed.op === "subscribe" &&
         parsed.msg === "Subscribed to 1 stream"
       ) {
         subscriptionActive.current = true;
-      }
-      if (!subscriptionActive.current) {
-        const msg: PrimeSocketRequest = {
-          op: "subscribe",
-          pairs: [selectedSource],
-          stream: "fx",
-        };
-
-        s.json(msg);
         return;
       }
-      if (subscriptionActive.current && parsed.op === "price") {
+
+      if (
+        subscriptionActive.current &&
+        parsed.op === "price" &&
+        isAllowedForexSymbol(selectedSource)
+      ) {
         addDataPoint("prime_api", selectedSource, {
           price:
             (Number.parseFloat(parsed.bid) + Number.parseFloat(parsed.ask)) / 2,
           timestamp: Date.now(),
         });
-        return;
       }
     },
     [addDataPoint, selectedSource],

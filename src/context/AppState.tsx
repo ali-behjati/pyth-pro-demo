@@ -11,6 +11,7 @@ import type {
   Nullish,
   PriceData,
 } from "../types";
+import { isAllowedSymbol } from "../util";
 
 export type AppStateContextVal = CurrentPricesState & {
   addDataPoint: (
@@ -27,10 +28,10 @@ const context = createContext<Nullish<AppStateContextVal>>(null);
 const emptyDataSourceResults: AllAndLatestDataState = { latest: {} };
 
 const initialState: CurrentPricesState = {
-  alltick: emptyDataSourceResults,
   binance: emptyDataSourceResults,
   bybit: emptyDataSourceResults,
   coinbase: emptyDataSourceResults,
+  infoway_io: emptyDataSourceResults,
   okx: emptyDataSourceResults,
   prime_api: emptyDataSourceResults,
   pyth: emptyDataSourceResults,
@@ -77,7 +78,7 @@ export function AppStateProvider({ children }: PropsWithChildren) {
       // blast away all state, because we don't need the old
       // data to be munged with the new data
       ...initialState,
-      selectedSource: source,
+      selectedSource: isAllowedSymbol(source) ? source : undefined,
     });
   }, []);
 

@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 
 import type { AllAllowedSymbols, AllDataSourcesType, Nullish } from "../types";
-import { useAllTickWebSocket } from "./useAllTickWebSocket";
 import { useBinanceWebSocket } from "./useBinanceWebSocket";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -9,15 +8,16 @@ import { useWebSocket } from "./useWebSocket";
 import { isNullOrUndefined } from "../util";
 import { useBybitWebSocket } from "./useBybitWebSocket";
 import { useCoinbaseWebSocket } from "./useCoinbaseWebSocket";
+import { useInfowayWebSocket } from "./useInfowayWebSocket";
 import { useOKXWebSocket } from "./useOKXWebSocket";
-import { usePythLazerWebSocket } from "./usePythLazerWebSocket";
 import { usePythWebSocket } from "./usePythWebSocket";
 import {
-  API_TOKEN_ALLTICK_API,
+  API_TOKEN_INFOWAY,
   API_TOKEN_PYTH_LAZER,
   PYTH_LAZER_ENDPOINT,
 } from "../constants";
 import { usePrimeApiWebSocket } from "./usePrimeApiWebSocket";
+import { usePythLazerWebSocket } from "./usePythLazerWebSocket";
 
 function getUrlForSymbolAndDataSource(
   dataSource: AllDataSourcesType,
@@ -26,8 +26,8 @@ function getUrlForSymbolAndDataSource(
   if (!symbol) return null;
 
   switch (dataSource) {
-    case "alltick": {
-      return `wss://quote.alltick.co/quote-b-ws-api?token=${API_TOKEN_ALLTICK_API}`;
+    case "infoway_io": {
+      return `wss://data.infoway.io/ws?business=common&apikey=${API_TOKEN_INFOWAY}`;
     }
     case "binance": {
       return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@bookTicker`;
@@ -88,8 +88,8 @@ export function useDataStream({
     usePythLazerWebSocket();
   const { onMessage: primeApiOnMessage, onOpen: primeApiOnOpen } =
     usePrimeApiWebSocket();
-  const { onMessage: alltickOnMessage, onOpen: alltickOnOpen } =
-    useAllTickWebSocket();
+  const { onMessage: infowayOnMessage, onOpen: infowayOnOpen } =
+    useInfowayWebSocket();
 
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
@@ -98,10 +98,6 @@ export function useDataStream({
       const strData = String(e.data);
 
       switch (dataSource) {
-        case "alltick": {
-          alltickOnMessage(s, usdtToUsdRate, strData);
-          break;
-        }
         case "binance": {
           binanceOnMessage(s, usdtToUsdRate, strData);
           break;
@@ -112,6 +108,10 @@ export function useDataStream({
         }
         case "coinbase": {
           coinbaseOnMessage(s, usdtToUsdRate, strData);
+          break;
+        }
+        case "infoway_io": {
+          infowayOnMessage(s, usdtToUsdRate, strData);
           break;
         }
         case "okx": {
@@ -136,10 +136,10 @@ export function useDataStream({
       }
     },
     [
-      alltickOnMessage,
       binanceOnMessage,
       bybitOnMessage,
       dataSource,
+      infowayOnMessage,
       okxOnMessage,
       primeApiOnMessage,
       pythOnMessage,
@@ -154,16 +154,16 @@ export function useDataStream({
       console.info("");
 
       switch (dataSource) {
-        case "alltick": {
-          alltickOnOpen?.(...args);
-          break;
-        }
         case "bybit": {
           bybitOnOpen?.(...args);
           break;
         }
         case "coinbase": {
           coinbaseOnOpen?.(...args);
+          break;
+        }
+        case "infoway_io": {
+          infowayOnOpen?.(...args);
           break;
         }
         case "okx": {
@@ -188,10 +188,10 @@ export function useDataStream({
       }
     },
     [
-      alltickOnOpen,
       bybitOnOpen,
       coinbaseOnOpen,
       dataSource,
+      infowayOnOpen,
       okxOnOpen,
       primeApiOnOpen,
       pythOnOpen,

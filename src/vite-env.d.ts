@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_API_TOKEN_ALLTICK_API: string;
+  readonly VITE_API_TOKEN_INFOWAY: string;
   readonly VITE_API_TOKEN_PRIME_API: string;
   readonly VITE_API_TOKEN_PYTH_LAZER: string;
 }

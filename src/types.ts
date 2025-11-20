@@ -35,7 +35,7 @@ export const DATA_SOURCES_FOREX = [
   "pyth",
   "pyth_lazer",
   "prime_api",
-  "alltick",
+  "infoway_io",
 ] as const;
 
 export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer"] as const;

@@ -5,7 +5,7 @@ import { PriceCard } from "./components/PriceCard";
 import { PriceChart } from "./components/PriceChart";
 import { SourceSelector } from "./components/SourceSelector";
 import {
-  API_TOKEN_ALLTICK_API,
+  API_TOKEN_INFOWAY,
   API_TOKEN_PRIME_API,
   API_TOKEN_PYTH_LAZER,
 } from "./constants";
@@ -71,10 +71,9 @@ export function App() {
     symbol: selectedSource,
   });
 
-  const { status: alltickStatus } = useDataStream({
-    dataSource: "alltick",
-    enabled:
-      isAllowedForexSymbol(selectedSource) && Boolean(API_TOKEN_ALLTICK_API),
+  const { status: infowayStatus } = useDataStream({
+    dataSource: "infoway_io",
+    enabled: isAllowedForexSymbol(selectedSource) && Boolean(API_TOKEN_INFOWAY),
     symbol: selectedSource,
   });
 
@@ -108,7 +107,7 @@ export function App() {
         )}
         {isForexSource && (
           <>
-            <PriceCard dataSource="alltick" status={alltickStatus} />
+            <PriceCard dataSource="infoway_io" status={infowayStatus} />
             <PriceCard dataSource="prime_api" status={primeApiStatus} />
           </>
         )}
