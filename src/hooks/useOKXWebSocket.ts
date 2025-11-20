@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { useCallback } from "react";
 
-import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
+import type { UseDataProviderSocketHookReturnType } from "../types";
 import { isAllowedCryptoSymbol } from "../util";
 
 type OKXBBOData = {
@@ -17,12 +17,14 @@ type OKXBBOData = {
   }[];
 };
 
-export function useOKXWebSocket() {
+export function useOKXWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint, selectedSource } = useAppStateContext();
 
   /** callbacks */
-  const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
+  const onOpen = useCallback<
+    NonNullable<UseDataProviderSocketHookReturnType["onOpen"]>
+  >(
     (socket) => {
       if (!isAllowedCryptoSymbol(selectedSource)) return;
 
@@ -46,8 +48,10 @@ export function useOKXWebSocket() {
     },
     [selectedSource],
   );
-  const onMessage = useCallback(
-    (usdtToUsdRate: number, strData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >(
+    (_, usdtToUsdRate, strData) => {
       if (!selectedSource) return;
 
       try {

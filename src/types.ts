@@ -1,6 +1,19 @@
+import type Sockette from "sockette";
 import type { ArrayValues } from "type-fest";
 
 export type Nullish<T> = T | null | undefined;
+
+export type UseDataProviderSocketHookReturnType = {
+  onMessage: (
+    socket: Sockette,
+    usdtToUsdRate: number,
+    socketData: string,
+  ) => void;
+  onOpen?: (
+    socket: Sockette,
+    ...rest: Parameters<NonNullable<WebSocket["onopen"]>>
+  ) => void;
+};
 
 export const ALLOWED_CRYPTO_SYMBOLS = ["BTCUSDT", "ETHUSDT"] as const;
 export const ALLOWED_EQUITY_SYMBOLS = ["TSLA", "NVDA"] as const;
@@ -18,7 +31,7 @@ export const DATA_SOURCES_CRYPTO = [
 
 export const DATA_SOURCES_EQUITY = ["pyth", "pyth_lazer"] as const;
 
-export const DATA_SOURCES_FOREX = ["pyth", "pyth_lazer"] as const;
+export const DATA_SOURCES_FOREX = ["pyth", "pyth_lazer", "prime_api"] as const;
 
 export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer"] as const;
 
@@ -50,7 +63,10 @@ export type DataSourcesForexType = ArrayValues<typeof DATA_SOURCES_FOREX>;
 
 export type DataSourcesTreasuryType = ArrayValues<typeof DATA_SOURCES_TREASURY>;
 
-export type AllDataSourcesType = DataSourcesCryptoType | DataSourcesEquityType;
+export type AllDataSourcesType =
+  | DataSourcesCryptoType
+  | DataSourcesEquityType
+  | DataSourcesForexType;
 
 export type PriceData = {
   price: number;
@@ -69,7 +85,6 @@ export type LatestMetric = Partial<
 >;
 
 export type AllAndLatestDataState = {
-  all: Partial<Record<AllAllowedSymbols, CurrentPriceMetrics[]>>;
   latest: Nullish<LatestMetric>;
 };
 

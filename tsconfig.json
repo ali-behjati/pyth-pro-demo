@@ -1,6 +1,7 @@
 {
   "extends": "@cprussin/tsconfig/nextjs.json",
   "compilerOptions": {
+    "incremental": false,
     "lib": [
       "DOM",
       "ESNext"

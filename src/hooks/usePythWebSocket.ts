@@ -2,7 +2,11 @@ import { useCallback } from "react";
 
 import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
-import type { AllAllowedSymbols, Nullish } from "../types";
+import type {
+  AllAllowedSymbols,
+  Nullish,
+  UseDataProviderSocketHookReturnType,
+} from "../types";
 import { isAllowedSymbol, isNullOrUndefined } from "../util";
 
 type PythPriceUpdateMessage = {
@@ -51,13 +55,15 @@ const PRICE_FEED_TO_SYMBOL_MAP = new Map(
   ]),
 );
 
-export function usePythWebSocket() {
+export function usePythWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint, selectedSource } = useAppStateContext();
 
   /** callbacks */
-  const onMessage = useCallback(
-    (_: number, strData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >(
+    (_, __, strData) => {
       const data = JSON.parse(strData) as Partial<
         PythPriceUpdateMessage & { result: string }
       >;

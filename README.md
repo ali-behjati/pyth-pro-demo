@@ -50,7 +50,7 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 4. Create a `.env` file in the project root and add your pyth_lazer auth token:
 
    ```bash
-   VITE_PYTH_LAZER_AUTH_TOKEN=your_auth_token_here
+   VITE_API_TOKEN_PYTH_LAZER=your_auth_token_here
    ```
 
 5. Start the development server:

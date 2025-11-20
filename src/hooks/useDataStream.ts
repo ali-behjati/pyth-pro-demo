@@ -1,10 +1,6 @@
 import { useCallback } from "react";
 
-import type {
-  AllAllowedSymbols,
-  DataSourcesCryptoType,
-  Nullish,
-} from "../types";
+import type { AllAllowedSymbols, AllDataSourcesType, Nullish } from "../types";
 import { useBinanceWebSocket } from "./useBinanceWebSocket";
 import { useFetchUsdtToUsdRate } from "./useFetchUsdtToUsdRate";
 import type { UseWebSocketOpts } from "./useWebSocket";
@@ -15,10 +11,11 @@ import { useCoinbaseWebSocket } from "./useCoinbaseWebSocket";
 import { useOKXWebSocket } from "./useOKXWebSocket";
 import { usePythLazerWebSocket } from "./usePythLazerWebSocket";
 import { usePythWebSocket } from "./usePythWebSocket";
-import { PYTH_LAZER_AUTH_TOKEN, PYTH_LAZER_ENDPOINT } from "../constants";
+import { API_TOKEN_PYTH_LAZER, PYTH_LAZER_ENDPOINT } from "../constants";
+import { usePrimeApiWebSocket } from "./usePrimeApiWebSocket";
 
 function getUrlForSymbolAndDataSource(
-  dataSource: DataSourcesCryptoType,
+  dataSource: AllDataSourcesType,
   symbol: Nullish<AllAllowedSymbols>,
 ) {
   if (!symbol) return null;
@@ -28,7 +25,7 @@ function getUrlForSymbolAndDataSource(
       return `wss://hermes.pyth.network/ws?__cachebust=${symbol.toLowerCase()}`;
     }
     case "pyth_lazer": {
-      return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${PYTH_LAZER_AUTH_TOKEN}&__cachebust=${symbol.toLowerCase()}`;
+      return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${API_TOKEN_PYTH_LAZER}&__cachebust=${symbol.toLowerCase()}`;
     }
     default: {
       break;
@@ -55,6 +52,17 @@ function getUrlForSymbolAndDataSource(
           break;
         }
       }
+      break;
+    }
+    case "EURUSD": {
+      switch (dataSource) {
+        case "prime_api": {
+          return "wss://euc2.primeapi.io/";
+        }
+        default: {
+          break;
+        }
+      }
     }
   }
 
@@ -62,7 +70,7 @@ function getUrlForSymbolAndDataSource(
 }
 
 type UseDataStreamOpts = {
-  dataSource: DataSourcesCryptoType;
+  dataSource: AllDataSourcesType;
   enabled?: boolean;
   symbol: Nullish<AllAllowedSymbols>;
 };
@@ -89,20 +97,22 @@ export function useDataStream({
   const { onMessage: pythOnMessage, onOpen: pythOnOpen } = usePythWebSocket();
   const { onMessage: pythLazerOnMessage, onOpen: pythLazerOnOpen } =
     usePythLazerWebSocket();
+  const { onMessage: primeApiOnMessage, onOpen: primeApiOnOpen } =
+    usePrimeApiWebSocket();
 
   /** callbacks */
   const onMessage = useCallback<UseWebSocketOpts["onMessage"]>(
-    (_, e) => {
+    (s, e) => {
       if (isNullOrUndefined(usdtToUsdRate)) return;
       const strData = String(e.data);
 
       switch (dataSource) {
         case "pyth": {
-          pythOnMessage(usdtToUsdRate, strData);
+          pythOnMessage(s, usdtToUsdRate, strData);
           break;
         }
         case "pyth_lazer": {
-          pythLazerOnMessage(usdtToUsdRate, strData);
+          pythLazerOnMessage(s, usdtToUsdRate, strData);
           break;
         }
         default: {
@@ -115,19 +125,31 @@ export function useDataStream({
         case "ETHUSDT": {
           switch (dataSource) {
             case "binance": {
-              binanceOnMessage(usdtToUsdRate, strData);
+              binanceOnMessage(s, usdtToUsdRate, strData);
               break;
             }
             case "bybit": {
-              bybitOnMessage(usdtToUsdRate, strData);
+              bybitOnMessage(s, usdtToUsdRate, strData);
               break;
             }
             case "coinbase": {
-              coinbaseOnMessage(usdtToUsdRate, strData);
+              coinbaseOnMessage(s, usdtToUsdRate, strData);
               break;
             }
             case "okx": {
-              okxOnMessage(usdtToUsdRate, strData);
+              okxOnMessage(s, usdtToUsdRate, strData);
+              break;
+            }
+          }
+          break;
+        }
+        case "EURUSD": {
+          switch (dataSource) {
+            case "prime_api": {
+              primeApiOnMessage(s, usdtToUsdRate, strData);
+              break;
+            }
+            default: {
               break;
             }
           }
@@ -138,6 +160,7 @@ export function useDataStream({
       binanceOnMessage,
       bybitOnMessage,
       okxOnMessage,
+      primeApiOnMessage,
       pythOnMessage,
       pythLazerOnMessage,
       symbol,
@@ -149,11 +172,11 @@ export function useDataStream({
     (...args) => {
       switch (dataSource) {
         case "pyth": {
-          pythOnOpen(...args);
+          pythOnOpen?.(...args);
           break;
         }
         case "pyth_lazer": {
-          pythLazerOnOpen(...args);
+          pythLazerOnOpen?.(...args);
           break;
         }
         default: {
@@ -166,15 +189,27 @@ export function useDataStream({
         case "ETHUSDT": {
           switch (dataSource) {
             case "bybit": {
-              bybitOnOpen(...args);
+              bybitOnOpen?.(...args);
               break;
             }
             case "coinbase": {
-              coinbaseOnOpen(...args);
+              coinbaseOnOpen?.(...args);
               break;
             }
             case "okx": {
-              okxOnOpen(...args);
+              okxOnOpen?.(...args);
+              break;
+            }
+            default: {
+              break;
+            }
+          }
+          break;
+        }
+        case "EURUSD": {
+          switch (dataSource) {
+            case "prime_api": {
+              primeApiOnOpen?.(...args);
               break;
             }
             default: {
@@ -188,6 +223,7 @@ export function useDataStream({
       bybitOnOpen,
       coinbaseOnOpen,
       okxOnOpen,
+      primeApiOnOpen,
       pythOnOpen,
       pythLazerOnOpen,
       symbol,

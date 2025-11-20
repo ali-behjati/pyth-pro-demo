@@ -4,13 +4,14 @@ import React from "react";
 import { PriceCard } from "./components/PriceCard";
 import { PriceChart } from "./components/PriceChart";
 import { SourceSelector } from "./components/SourceSelector";
-import { PYTH_LAZER_AUTH_TOKEN } from "./constants";
+import { API_TOKEN_PRIME_API, API_TOKEN_PYTH_LAZER } from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
 import { DATA_SOURCES_CRYPTO } from "./types";
 import {
   getColorForDataSource,
   isAllowedCryptoSymbol,
+  isAllowedForexSymbol,
   isAllowedSymbol,
 } from "./util";
 
@@ -20,6 +21,7 @@ export function App() {
 
   /** local variables */
   const isCryptoSource = isAllowedCryptoSymbol(selectedSource);
+  const isForexSource = isAllowedForexSymbol(selectedSource);
 
   /** hooks */
   const { status: binanceStatus } = useDataStream({
@@ -54,7 +56,14 @@ export function App() {
 
   const { status: pythLazerStatus } = useDataStream({
     dataSource: "pyth_lazer",
-    enabled: isAllowedSymbol(selectedSource) && Boolean(PYTH_LAZER_AUTH_TOKEN),
+    enabled: isAllowedSymbol(selectedSource) && Boolean(API_TOKEN_PYTH_LAZER),
+    symbol: selectedSource,
+  });
+
+  const { status: primeApiStatus } = useDataStream({
+    dataSource: "prime_api",
+    enabled:
+      isAllowedForexSymbol(selectedSource) && Boolean(API_TOKEN_PRIME_API),
     symbol: selectedSource,
   });
 
@@ -80,45 +89,19 @@ export function App() {
       <div className="price-cards">
         {isCryptoSource && (
           <>
-            <PriceCard
-              dataSource="binance"
-              symbol={selectedSource}
-              status={binanceStatus}
-            />
-            <PriceCard
-              dataSource="bybit"
-              symbol={selectedSource}
-              status={bybitStatus}
-            />
-            <PriceCard
-              dataSource="coinbase"
-              symbol={selectedSource}
-              status={coinbaseStatus}
-            />
-            <PriceCard
-              dataSource="okx"
-              symbol={selectedSource}
-              status={okxStatus}
-            />
+            <PriceCard dataSource="binance" status={binanceStatus} />
+            <PriceCard dataSource="bybit" status={bybitStatus} />
+            <PriceCard dataSource="coinbase" status={coinbaseStatus} />
+            <PriceCard dataSource="okx" status={okxStatus} />
           </>
         )}
-        <PriceCard
-          dataSource="pyth"
-          symbol={selectedSource}
-          status={pythStatus}
-        />
-        {PYTH_LAZER_AUTH_TOKEN && (
-          <PriceCard
-            dataSource="pyth_lazer"
-            symbol={selectedSource}
-            status={pythLazerStatus}
-          />
+        {isForexSource && (
+          <>
+            <PriceCard dataSource="prime_api" status={primeApiStatus} />
+          </>
         )}
-        {!PYTH_LAZER_AUTH_TOKEN && (
-          <div className="price-card">
-            Please provide your PYTH Pro / Lazer access token to continue
-          </div>
-        )}
+        <PriceCard dataSource="pyth" status={pythStatus} />
+        <PriceCard dataSource="pyth_lazer" status={pythLazerStatus} />
       </div>
 
       <PriceChart key={selectedSource} />

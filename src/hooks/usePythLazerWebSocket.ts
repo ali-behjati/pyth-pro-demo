@@ -1,8 +1,11 @@
 import { useCallback } from "react";
 
-import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
-import type { AllAllowedSymbols, Nullish } from "../types";
+import type {
+  AllAllowedSymbols,
+  Nullish,
+  UseDataProviderSocketHookReturnType,
+} from "../types";
 import { isAllowedSymbol, isNullOrUndefined } from "../util";
 
 type PythLazerStreamUpdate = {
@@ -53,12 +56,14 @@ const SYMBOL_TO_CHANNEL_MAP = new Map<
   ["US10Y", "fixed_rate@200ms"],
 ]);
 
-export function usePythLazerWebSocket() {
+export function usePythLazerWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint, selectedSource } = useAppStateContext();
 
   /** callbacks */
-  const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
+  const onOpen = useCallback<
+    NonNullable<UseDataProviderSocketHookReturnType["onOpen"]>
+  >(
     (socket) => {
       if (!selectedSource) return;
       const feedId = SYMBOL_TO_PRICE_FEED_MAP.get(selectedSource);
@@ -78,8 +83,10 @@ export function usePythLazerWebSocket() {
     },
     [selectedSource],
   );
-  const onMessage = useCallback(
-    (_: number, strData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >(
+    (_, __, strData) => {
       const data = JSON.parse(strData) as Partial<
         PythLazerStreamUpdate & { type: string }
       >;

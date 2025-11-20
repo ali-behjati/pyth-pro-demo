@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { useAppStateContext } from "../context";
+import type { UseDataProviderSocketHookReturnType } from "../types";
 import { isAllowedCryptoSymbol } from "../util";
 
 type BinanceOrderBookData = {
@@ -11,13 +12,15 @@ type BinanceOrderBookData = {
   A: string; // best ask quantity
 };
 
-export function useBinanceWebSocket() {
+export function useBinanceWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint } = useAppStateContext();
 
   /** callbacks */
-  const onMessage = useCallback(
-    (usdtToUsdRate: number, socketData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >(
+    (_, usdtToUsdRate, socketData) => {
       try {
         const data = JSON.parse(socketData) as BinanceOrderBookData;
         if (isAllowedCryptoSymbol(data.s)) {

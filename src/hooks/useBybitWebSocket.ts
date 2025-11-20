@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 
-import type { AllowedCryptoSymbolsType } from "../types";
+import type {
+  AllowedCryptoSymbolsType,
+  UseDataProviderSocketHookReturnType,
+} from "../types";
 import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
 import { isNullOrUndefined } from "../util";
@@ -18,7 +21,7 @@ type BybitOrderBookData = {
   };
 };
 
-export function useBybitWebSocket() {
+export function useBybitWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint, selectedSource } = useAppStateContext();
 
@@ -35,7 +38,9 @@ export function useBybitWebSocket() {
     },
     [selectedSource],
   );
-  const onMessage = useCallback((usdtToUsdRate: number, socketData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >((_, usdtToUsdRate, socketData) => {
     const data = JSON.parse(socketData) as Partial<
       BybitOrderBookData & {
         topic: `orderbook.1.${AllowedCryptoSymbolsType}`;

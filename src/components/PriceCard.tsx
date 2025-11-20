@@ -1,14 +1,14 @@
 import { capitalCase } from "change-case";
 import React from "react";
 
+import { API_TOKEN_PRIME_API } from "../constants";
 import { useAppStateContext } from "../context";
 import type { useWebSocket } from "../hooks/useWebSocket";
-import type { AllDataSourcesType, Nullish, AllAllowedSymbols } from "../types";
+import type { AllDataSourcesType, Nullish } from "../types";
 import { getColorForDataSource, isNullOrUndefined } from "../util";
 
 type PriceCardProps = Pick<ReturnType<typeof useWebSocket>, "status"> & {
   dataSource: AllDataSourcesType;
-  symbol: Nullish<AllAllowedSymbols>;
 };
 
 const MAX_PRECISION = 6;
@@ -44,13 +44,40 @@ const getChangeClass = (change: Nullish<number>): string => {
   return "price-neutral";
 };
 
-export function PriceCard({ dataSource, symbol, status }: PriceCardProps) {
+export function PriceCard({ dataSource, status }: PriceCardProps) {
   /** context */
   const state = useAppStateContext();
+  const { selectedSource: symbol } = state;
 
   if (isNullOrUndefined(symbol)) return null;
 
   const metrics = state[dataSource].latest?.[symbol];
+
+  switch (dataSource) {
+    case "prime_api": {
+      if (!API_TOKEN_PRIME_API) {
+        return (
+          <div className="price-card">
+            Please provide your Prime API access token to continue
+          </div>
+        );
+      }
+      break;
+    }
+    case "pyth_lazer": {
+      if (!API_TOKEN_PRIME_API) {
+        return (
+          <div className="price-card">
+            Please provide your PYTH Pro / Lazer access token to continue
+          </div>
+        );
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
 
   return (
     <div className="price-card">

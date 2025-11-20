@@ -3,7 +3,10 @@ import { useRef, useCallback } from "react";
 
 import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
-import type { AllowedCryptoSymbolsType } from "../types";
+import type {
+  AllowedCryptoSymbolsType,
+  UseDataProviderSocketHookReturnType,
+} from "../types";
 import { isAllowedCryptoSymbol, isNullOrUndefined } from "../util";
 
 type CoinbaseAdvancedTradeLevel2Message = {
@@ -42,7 +45,7 @@ type CoinbaseLevel2Snapshot = {
   }[];
 };
 
-export function useCoinbaseWebSocket() {
+export function useCoinbaseWebSocket(): UseDataProviderSocketHookReturnType {
   /** context */
   const { addDataPoint, selectedSource } = useAppStateContext();
 
@@ -93,7 +96,9 @@ export function useCoinbaseWebSocket() {
     },
     [selectedSource],
   );
-  const onMessage = useCallback((_: number, strData: string) => {
+  const onMessage = useCallback<
+    UseDataProviderSocketHookReturnType["onMessage"]
+  >((_, __, strData) => {
     const data = JSON.parse(strData) as Partial<{
       channel: string;
       events: CoinbaseAdvancedTradeLevel2Message["events"];

@@ -6,7 +6,6 @@ import type {
   AllAndLatestDataState,
   AllDataSourcesType,
   AllowedCryptoSymbolsType,
-  CurrentPriceMetrics,
   CurrentPricesState,
   LatestMetric,
   Nullish,
@@ -25,13 +24,16 @@ export type AppStateContextVal = CurrentPricesState & {
 
 const context = createContext<Nullish<AppStateContextVal>>(null);
 
+const emptyDataSourceResults: AllAndLatestDataState = { latest: {} };
+
 const initialState: CurrentPricesState = {
-  binance: { all: {}, latest: {} },
-  bybit: { all: {}, latest: {} },
-  coinbase: { all: {}, latest: {} },
-  okx: { all: {}, latest: {} },
-  pyth: { all: {}, latest: {} },
-  pyth_lazer: { all: {}, latest: {} },
+  binance: emptyDataSourceResults,
+  bybit: emptyDataSourceResults,
+  coinbase: emptyDataSourceResults,
+  okx: emptyDataSourceResults,
+  prime_api: emptyDataSourceResults,
+  pyth: emptyDataSourceResults,
+  pyth_lazer: emptyDataSourceResults,
   selectedSource: null,
 };
 
@@ -53,12 +55,6 @@ export function AppStateProvider({ children }: PropsWithChildren) {
           ...prev,
           [dataSource]: {
             ...prev[dataSource],
-            all: {
-              ...prev[dataSource].all,
-              [symbol]: [
-                { ...dataPoint, change: null, changePercent: null },
-              ] satisfies CurrentPriceMetrics[],
-            },
             latest: {
               ...prev[dataSource].latest,
               [symbol]: {
