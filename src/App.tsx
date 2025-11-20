@@ -8,7 +8,11 @@ import { PYTH_LAZER_AUTH_TOKEN } from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
 import { DATA_SOURCES_CRYPTO } from "./types";
-import { getColorForDataSource, isAllowedCryptoSymbol } from "./util";
+import {
+  getColorForDataSource,
+  isAllowedCryptoSymbol,
+  isAllowedSymbol,
+} from "./util";
 
 export function App() {
   /** context */
@@ -44,14 +48,14 @@ export function App() {
 
   const { status: pythStatus } = useDataStream({
     dataSource: "pyth",
-    enabled: isCryptoSource,
-    symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
+    enabled: isAllowedSymbol(selectedSource),
+    symbol: selectedSource,
   });
 
   const { status: pythLazerStatus } = useDataStream({
     dataSource: "pyth_lazer",
-    enabled: isCryptoSource && Boolean(PYTH_LAZER_AUTH_TOKEN),
-    symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
+    enabled: isAllowedSymbol(selectedSource) && Boolean(PYTH_LAZER_AUTH_TOKEN),
+    symbol: selectedSource,
   });
 
   return (
@@ -96,24 +100,24 @@ export function App() {
               symbol={selectedSource}
               status={okxStatus}
             />
-            <PriceCard
-              dataSource="pyth"
-              symbol={selectedSource}
-              status={pythStatus}
-            />
-            {PYTH_LAZER_AUTH_TOKEN && (
-              <PriceCard
-                dataSource="pyth_lazer"
-                symbol={selectedSource}
-                status={pythLazerStatus}
-              />
-            )}
-            {!PYTH_LAZER_AUTH_TOKEN && (
-              <div className="price-card">
-                Please provide your PYTH Pro / Lazer access token to continue
-              </div>
-            )}
           </>
+        )}
+        <PriceCard
+          dataSource="pyth"
+          symbol={selectedSource}
+          status={pythStatus}
+        />
+        {PYTH_LAZER_AUTH_TOKEN && (
+          <PriceCard
+            dataSource="pyth_lazer"
+            symbol={selectedSource}
+            status={pythLazerStatus}
+          />
+        )}
+        {!PYTH_LAZER_AUTH_TOKEN && (
+          <div className="price-card">
+            Please provide your PYTH Pro / Lazer access token to continue
+          </div>
         )}
       </div>
 

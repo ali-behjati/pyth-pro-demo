@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import type { UseWebSocketOpts } from "./useWebSocket";
 import { useAppStateContext } from "../context";
-import type { AllowedCryptoSymbolsType, Nullish } from "../types";
+import type { AllAllowedSymbols, Nullish } from "../types";
 import { isAllowedCryptoSymbol, isNullOrUndefined } from "../util";
 
 type PythLazerStreamUpdate = {
@@ -17,10 +17,23 @@ type PythLazerStreamUpdate = {
   };
 };
 
-// pyth_lazer configuration
-// these are grabbed from https://docs.pyth.network/price-feeds/pro/price-feed-ids
-const BTC_PRICE_FEED_ID = 1;
-const ETH_PRICE_FEED_ID = 2;
+const SYMBOL_TO_PRICE_FEED_MAP = new Map<
+  Nullish<AllAllowedSymbols>,
+  Nullish<number>
+>([
+  [undefined, undefined],
+  [null, null],
+  ["BTCUSDT", 1],
+  ["ETHUSDT", 2],
+  ["TSLA", 1435],
+]);
+
+const PRICE_FEED_TO_SYMBOL_MAP = new Map(
+  SYMBOL_TO_PRICE_FEED_MAP.entries().map(([symbol, feedId]) => [
+    feedId,
+    symbol,
+  ]),
+);
 
 export function usePythLazerWebSocket() {
   /** context */
@@ -30,9 +43,7 @@ export function usePythLazerWebSocket() {
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (socket) => {
       if (!selectedSource) return;
-      let feedId: number | null = null;
-      if (selectedSource === "BTCUSDT") feedId = BTC_PRICE_FEED_ID;
-      else if (selectedSource === "ETHUSDT") feedId = ETH_PRICE_FEED_ID;
+      const feedId = SYMBOL_TO_PRICE_FEED_MAP.get(selectedSource);
 
       if (isNullOrUndefined(feedId)) return;
 
@@ -62,12 +73,7 @@ export function usePythLazerWebSocket() {
         if (updateData.parsed?.priceFeeds?.length) {
           const priceFeed = updateData.parsed.priceFeeds[0];
 
-          let symbol: Nullish<AllowedCryptoSymbolsType> = null;
-          if (priceFeed?.priceFeedId === BTC_PRICE_FEED_ID) {
-            symbol = "BTCUSDT";
-          } else if (priceFeed?.priceFeedId === ETH_PRICE_FEED_ID) {
-            symbol = "ETHUSDT";
-          }
+          const symbol = PRICE_FEED_TO_SYMBOL_MAP.get(priceFeed?.priceFeedId);
 
           if (!isNullOrUndefined(priceFeed) && isAllowedCryptoSymbol(symbol)) {
             // pyth_lazer price has 8 decimal places precision, convert to dollars

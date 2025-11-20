@@ -8,7 +8,7 @@ import { getColorForDataSource, isNullOrUndefined } from "../util";
 
 type PriceCardProps = Pick<ReturnType<typeof useWebSocket>, "status"> & {
   dataSource: AllDataSourcesType;
-  symbol: AllAllowedSymbols;
+  symbol: Nullish<AllAllowedSymbols>;
 };
 
 const formatChange = (
@@ -42,6 +42,9 @@ const getChangeClass = (change: Nullish<number>): string => {
 export function PriceCard({ dataSource, symbol, status }: PriceCardProps) {
   /** context */
   const state = useAppStateContext();
+
+  if (isNullOrUndefined(symbol)) return null;
+
   const metrics = state[dataSource].latest?.[symbol];
 
   return (
@@ -58,6 +61,7 @@ export function PriceCard({ dataSource, symbol, status }: PriceCardProps) {
           </div>
         </>
       )}
+      {!metrics && <div className="price-value">No data received</div>}
       <div>{status}</div>
     </div>
   );

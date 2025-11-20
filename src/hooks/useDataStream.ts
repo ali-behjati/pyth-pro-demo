@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import type {
-  AllowedCryptoSymbolsType,
+  AllAllowedSymbols,
   DataSourcesCryptoType,
   Nullish,
 } from "../types";
@@ -19,9 +19,21 @@ import { PYTH_LAZER_AUTH_TOKEN, PYTH_LAZER_ENDPOINT } from "../constants";
 
 function getUrlForSymbolAndDataSource(
   dataSource: DataSourcesCryptoType,
-  symbol: Nullish<AllowedCryptoSymbolsType>,
+  symbol: Nullish<AllAllowedSymbols>,
 ) {
   if (!symbol) return null;
+
+  switch (dataSource) {
+    case "pyth": {
+      return `wss://hermes.pyth.network/ws?__cachebust=${symbol.toLowerCase()}`;
+    }
+    case "pyth_lazer": {
+      return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${PYTH_LAZER_AUTH_TOKEN}&__cachebust=${symbol.toLowerCase()}`;
+    }
+    default: {
+      break;
+    }
+  }
 
   switch (symbol) {
     case "BTCUSDT":
@@ -39,21 +51,20 @@ function getUrlForSymbolAndDataSource(
         case "okx": {
           return `wss://ws.okx.com:8443/ws/v5/public?__cachebust=${symbol.toLowerCase()}`;
         }
-        case "pyth": {
-          return `wss://hermes.pyth.network/ws?__cachebust=${symbol.toLowerCase()}`;
-        }
-        case "pyth_lazer": {
-          return `${PYTH_LAZER_ENDPOINT}?ACCESS_TOKEN=${PYTH_LAZER_AUTH_TOKEN}&__cachebust=${symbol.toLowerCase()}`;
+        default: {
+          break;
         }
       }
     }
   }
+
+  return null;
 }
 
 type UseDataStreamOpts = {
   dataSource: DataSourcesCryptoType;
   enabled?: boolean;
-  symbol: Nullish<AllowedCryptoSymbolsType>;
+  symbol: Nullish<AllAllowedSymbols>;
 };
 
 /**
@@ -85,6 +96,20 @@ export function useDataStream({
       if (isNullOrUndefined(usdtToUsdRate)) return;
       const strData = String(e.data);
 
+      switch (dataSource) {
+        case "pyth": {
+          pythOnMessage(usdtToUsdRate, strData);
+          break;
+        }
+        case "pyth_lazer": {
+          pythLazerOnMessage(usdtToUsdRate, strData);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
       switch (symbol) {
         case "BTCUSDT":
         case "ETHUSDT": {
@@ -105,14 +130,6 @@ export function useDataStream({
               okxOnMessage(usdtToUsdRate, strData);
               break;
             }
-            case "pyth": {
-              pythOnMessage(usdtToUsdRate, strData);
-              break;
-            }
-            case "pyth_lazer": {
-              pythLazerOnMessage(usdtToUsdRate, strData);
-              break;
-            }
           }
         }
       }
@@ -130,6 +147,20 @@ export function useDataStream({
 
   const onOpen = useCallback<NonNullable<UseWebSocketOpts["onOpen"]>>(
     (...args) => {
+      switch (dataSource) {
+        case "pyth": {
+          pythOnOpen(...args);
+          break;
+        }
+        case "pyth_lazer": {
+          pythLazerOnOpen(...args);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
       switch (symbol) {
         case "BTCUSDT":
         case "ETHUSDT": {
@@ -144,14 +175,6 @@ export function useDataStream({
             }
             case "okx": {
               okxOnOpen(...args);
-              break;
-            }
-            case "pyth": {
-              pythOnOpen(...args);
-              break;
-            }
-            case "pyth_lazer": {
-              pythLazerOnOpen(...args);
               break;
             }
             default: {

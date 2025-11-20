@@ -18,7 +18,7 @@ import type { Nullish } from "../../types";
 import { DATA_SOURCES_CRYPTO } from "../../types";
 import {
   getColorForDataSource,
-  isAllowedCryptoSymbol,
+  isAllowedSymbol,
   isNullOrUndefined,
 } from "../../util";
 
@@ -131,7 +131,7 @@ export function PriceChart() {
     };
   }, []);
 
-  if (!isAllowedCryptoSymbol(state.selectedSource)) return null;
+  if (!isAllowedSymbol(state.selectedSource)) return null;
 
   return (
     <div className={classes.priceChartRoot}>
