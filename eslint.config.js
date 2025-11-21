@@ -1,7 +1,7 @@
-import { base } from "@cprussin/eslint-config";
+import { respectPrettierConfig } from "eslint-config-react-yas";
 
 export default [
-  ...base,
+  ...respectPrettierConfig,
   {
     rules: {
       "unicorn/filename-case": "off",

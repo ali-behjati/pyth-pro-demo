@@ -12,6 +12,7 @@ import {
 } from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
+import { useFetchUs10y } from "./hooks/useFetchUs10y";
 import type { AllDataSourcesType } from "./types";
 import {
   DATA_SOURCES_CRYPTO,
@@ -97,6 +98,8 @@ export function App() {
     symbol: selectedSource,
   });
 
+  useFetchUs10y();
+
   const dataSourcesInUse = useMemo(() => {
     let out: AllDataSourcesType[] = [];
     if (isAllowedCryptoSymbol(selectedSource)) {
@@ -124,6 +127,7 @@ export function App() {
       pyth,
       pyth_lazer,
       twelve_data,
+      yahoo: isAllowedTreasurySymbol(selectedSource) ? "connected" : "closed",
     }),
     [
       binance,
@@ -134,6 +138,7 @@ export function App() {
       prime_api,
       pyth,
       pyth_lazer,
+      selectedSource,
       twelve_data,
     ],
   );

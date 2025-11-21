@@ -47,7 +47,7 @@ export const DATA_SOURCES_FOREX = [
   "infoway_io",
 ] as const;
 
-export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer"] as const;
+export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer", "yahoo"] as const;
 
 export const ALL_DATA_SOURCES = [
   ...new Set([
@@ -89,7 +89,8 @@ export type DataSourcesTreasuryType = ArrayValues<typeof DATA_SOURCES_TREASURY>;
 export type AllDataSourcesType =
   | DataSourcesCryptoType
   | DataSourcesEquityType
-  | DataSourcesForexType;
+  | DataSourcesForexType
+  | DataSourcesTreasuryType;
 
 export type PriceData = {
   price: number;

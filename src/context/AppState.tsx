@@ -38,6 +38,7 @@ const initialState: CurrentPricesState = {
   pyth_lazer: emptyDataSourceResults,
   selectedSource: null,
   twelve_data: emptyDataSourceResults,
+  yahoo: emptyDataSourceResults,
 };
 
 export function AppStateProvider({ children }: PropsWithChildren) {

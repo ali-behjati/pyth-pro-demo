@@ -45,9 +45,7 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 
 ### Prerequisites
 
-- Node.js 24 (managed automatically if you use [mise](https://mise.jdx.dev))
-- pnpm (version 10.22.0 as defined in `.tool-versions`)
-- Optional: npm 11.6.2 (also managed via mise)
+- bun (version 1.3.2 as defined in `.tool-versions`)
 - API tokens for external providers (see [API Tokens](#api-tokens))
 
 ### Installation
@@ -62,7 +60,7 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 3. Install dependencies:
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 4. Create a `.env` file in the project root and set the required tokens ([see below](#api-tokens)).
@@ -70,7 +68,7 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 5. Start the development server:
 
    ```bash
-   pnpm run dev
+   bun run dev
    ```
 
 6. Open your browser and navigate to `http://localhost:3000`
@@ -78,9 +76,9 @@ A real-time Bitcoin (BTC) price monitoring application that fetches live price d
 ### Local Development with mise
 
 1. Install [mise](https://mise.jdx.dev) if you do not already have it available.
-2. From the project root, run `mise install` to install the Node.js, pnpm, and npm versions specified in `.tool-versions`.
+2. From the project root, run `mise install` to install the tool versions specified in `.tool-versions`.
 3. Start a shell with `mise shell` (or `mise env -s bash`/`zsh`) so the managed toolchain is on your `PATH`.
-4. Inside that shell, run the usual project commands such as `pnpm install`, `pnpm run dev`, or `pnpm run build`.
+4. Inside that shell, run the usual project commands such as `bun install`, `bun run dev`, or `bun run build`.
 
 ### API Tokens
 
@@ -98,7 +96,7 @@ Tokens that are not needed for your setup can be left unset, but the correspondi
 ### Build for Production
 
 ```bash
-pnpm build
+bun build
 ```
 
 ## Troubleshooting
