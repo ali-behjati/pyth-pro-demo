@@ -16,7 +16,7 @@ export type UseDataProviderSocketHookReturnType = {
 };
 
 export const ALLOWED_CRYPTO_SYMBOLS = ["BTCUSDT", "ETHUSDT"] as const;
-export const ALLOWED_EQUITY_SYMBOLS = ["AAPL", "TSLA", "NVDA"] as const;
+export const ALLOWED_EQUITY_SYMBOLS = ["AAPL", "NVDA", "TSLA"] as const;
 export const ALLOWED_FOREX_SYMBOLS = ["EURUSD"] as const;
 export const ALLOWED_TREASURY_SYMBOLS = ["US10Y"] as const;
 
@@ -41,7 +41,6 @@ export const DATA_SOURCES_FOREX = [
   "pyth_lazer",
   "prime_api",
   "infoway_io",
-  "twelve_data",
 ] as const;
 
 export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer"] as const;

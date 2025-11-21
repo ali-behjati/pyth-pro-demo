@@ -12,6 +12,7 @@ import {
 } from "./constants";
 import { useAppStateContext } from "./context";
 import { useDataStream } from "./hooks/useDataStream";
+import type { AllDataSourcesType } from "./types";
 import {
   DATA_SOURCES_CRYPTO,
   DATA_SOURCES_EQUITY,
@@ -33,54 +34,52 @@ export function App() {
 
   /** local variables */
   const isCryptoSource = isAllowedCryptoSymbol(selectedSource);
-  const isForexSource = isAllowedForexSymbol(selectedSource);
-  const isEquitySource = isAllowedEquitySymbol(selectedSource);
 
   /** hooks */
-  const { status: binanceStatus } = useDataStream({
+  const { status: binance } = useDataStream({
     dataSource: "binance",
     enabled: isCryptoSource,
     symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
   });
 
-  const { status: bybitStatus } = useDataStream({
+  const { status: bybit } = useDataStream({
     dataSource: "bybit",
     enabled: isCryptoSource,
     symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
   });
 
-  const { status: coinbaseStatus } = useDataStream({
+  const { status: coinbase } = useDataStream({
     dataSource: "coinbase",
     enabled: isCryptoSource,
     symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
   });
 
-  const { status: okxStatus } = useDataStream({
+  const { status: okx } = useDataStream({
     dataSource: "okx",
     enabled: isCryptoSource,
     symbol: isAllowedCryptoSymbol(selectedSource) ? selectedSource : null,
   });
 
-  const { status: pythStatus } = useDataStream({
+  const { status: pyth } = useDataStream({
     dataSource: "pyth",
     enabled: isAllowedSymbol(selectedSource),
     symbol: selectedSource,
   });
 
-  const { status: pythLazerStatus } = useDataStream({
+  const { status: pyth_lazer } = useDataStream({
     dataSource: "pyth_lazer",
     enabled: isAllowedSymbol(selectedSource) && Boolean(API_TOKEN_PYTH_LAZER),
     symbol: selectedSource,
   });
 
-  const { status: primeApiStatus } = useDataStream({
+  const { status: prime_api } = useDataStream({
     dataSource: "prime_api",
     enabled:
       isAllowedForexSymbol(selectedSource) && Boolean(API_TOKEN_PRIME_API),
     symbol: selectedSource,
   });
 
-  const { status: infowayStatus } = useDataStream({
+  const { status: infoway_io } = useDataStream({
     dataSource: "infoway_io",
     enabled:
       (isAllowedForexSymbol(selectedSource) ||
@@ -89,7 +88,7 @@ export function App() {
     symbol: selectedSource,
   });
 
-  const { status: twelveStatus } = useDataStream({
+  const { status: twelve_data } = useDataStream({
     dataSource: "twelve_data",
     enabled:
       (isAllowedForexSymbol(selectedSource) ||
@@ -99,20 +98,45 @@ export function App() {
   });
 
   const dataSourcesInUse = useMemo(() => {
+    let out: AllDataSourcesType[] = [];
     if (isAllowedCryptoSymbol(selectedSource)) {
-      return [...DATA_SOURCES_CRYPTO];
+      out = [...DATA_SOURCES_CRYPTO];
+    } else if (isAllowedForexSymbol(selectedSource)) {
+      out = [...DATA_SOURCES_FOREX];
+    } else if (isAllowedEquitySymbol(selectedSource)) {
+      out = [...DATA_SOURCES_EQUITY];
+    } else if (isAllowedTreasurySymbol(selectedSource)) {
+      out = [...DATA_SOURCES_TREASURY];
     }
-    if (isAllowedForexSymbol(selectedSource)) {
-      return [...DATA_SOURCES_FOREX];
-    }
-    if (isAllowedEquitySymbol(selectedSource)) {
-      return [...DATA_SOURCES_EQUITY];
-    }
-    if (isAllowedTreasurySymbol(selectedSource)) {
-      return [...DATA_SOURCES_TREASURY];
-    }
-    return [];
+    return out.sort();
   }, [selectedSource]);
+
+  const dataSourceStatuses = useMemo<
+    Record<AllDataSourcesType, ReturnType<typeof useDataStream>["status"]>
+  >(
+    () => ({
+      binance,
+      bybit,
+      coinbase,
+      infoway_io,
+      okx,
+      prime_api,
+      pyth,
+      pyth_lazer,
+      twelve_data,
+    }),
+    [
+      binance,
+      bybit,
+      coinbase,
+      infoway_io,
+      okx,
+      prime_api,
+      pyth,
+      pyth_lazer,
+      twelve_data,
+    ],
+  );
 
   return (
     <div className="app-container">
@@ -134,27 +158,12 @@ export function App() {
       </div>
 
       <div className="price-cards">
-        {isCryptoSource && (
-          <>
-            <PriceCard dataSource="binance" status={binanceStatus} />
-            <PriceCard dataSource="bybit" status={bybitStatus} />
-            <PriceCard dataSource="coinbase" status={coinbaseStatus} />
-            <PriceCard dataSource="okx" status={okxStatus} />
-          </>
-        )}
-        {(isForexSource || isEquitySource) && (
-          <>
-            <PriceCard dataSource="infoway_io" status={infowayStatus} />
-            <PriceCard dataSource="twelve_data" status={twelveStatus} />
-          </>
-        )}
-        {isForexSource && (
-          <>
-            <PriceCard dataSource="prime_api" status={primeApiStatus} />
-          </>
-        )}
-        <PriceCard dataSource="pyth" status={pythStatus} />
-        <PriceCard dataSource="pyth_lazer" status={pythLazerStatus} />
+        {dataSourcesInUse.map((dataSource) => (
+          <PriceCard
+            dataSource={dataSource}
+            status={dataSourceStatuses[dataSource]}
+          />
+        ))}
       </div>
 
       <PriceChart key={selectedSource} />
@@ -173,7 +182,7 @@ export function App() {
         {selectedSource && (
           <div className="data-sources-list">
             Data sources:
-            {dataSourcesInUse.toSorted().map((source) => (
+            {dataSourcesInUse.map((source) => (
               <span
                 key={source}
                 style={{ color: getColorForDataSource(source) }}
