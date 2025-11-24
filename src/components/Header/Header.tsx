@@ -1,24 +1,24 @@
 import { Toolbar } from "primereact/toolbar";
 
 import classes from "./Header.module.css";
+import { getColorForDataSource } from "../../util";
 import { SourceSelectorV2 } from "../SourceSelectorV2";
-import { ThemeSwitcher } from "../ThemeSwitchers";
 
 export function Header() {
   return (
     <Toolbar
       className={classes.root}
-      center={
+      end={
         <>
           <SourceSelectorV2 />
         </>
       }
-      end={
-        <>
-          <ThemeSwitcher />
-        </>
+      start={
+        <div className={classes.title}>
+          <span style={{ color: getColorForDataSource("pyth") }}>Pyth</span>
+          <span>Realtime feed comparison tool</span>
+        </div>
       }
-      start={<>Pyth - Realtime feed comparison tool</>}
     />
   );
 }

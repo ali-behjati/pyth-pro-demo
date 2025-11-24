@@ -146,7 +146,7 @@ export const NO_SELECTION_VAL = "No selection" as const;
 
 export const SOURCE_SELECTOR_OPTS = [
   {
-    label: NO_SELECTION_VAL,
+    label: "Select an asset to visualize",
     value: NO_SELECTION_VAL,
     type: "None",
   },

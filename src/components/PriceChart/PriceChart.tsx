@@ -10,6 +10,7 @@ import {
   TimeScale,
   Tooltip,
 } from "chart.js";
+import dayjs from "dayjs";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import classes from "./PriceChart.module.css";
@@ -65,7 +66,16 @@ export function PriceChart() {
             beginAtZero: false,
             type: "linear", // push numeric timestamps or indices
             grid: { display: true },
-            ticks: { display: false },
+            ticks: {
+              callback(val) {
+                const num = Number(val);
+                const d = new Date();
+                d.setTime(num);
+
+                return dayjs(d).format("hh:MM:ss A");
+              },
+              display: true,
+            },
           },
           y: { type: "linear", beginAtZero: false, grid: { display: true } },
         },

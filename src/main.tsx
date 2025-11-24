@@ -1,4 +1,5 @@
 import "./globals.css";
+import "primereact/resources/themes/soho-light/theme.css";
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PrimeReactProvider } from "primereact/api";
@@ -7,14 +8,14 @@ import ReactDOM from "react-dom/client";
 
 import "primeicons/primeicons.css";
 import { AppV2 } from "./AppV2";
-import { AppStateProvider, ThemeProvider } from "./context";
+import { AppStateProvider, WebSocketsProvider } from "./context";
 
 ReactDOM.createRoot(document.querySelector("#root")!).render(
   <PrimeReactProvider>
-    <ThemeProvider>
-      <AppStateProvider>
+    <AppStateProvider>
+      <WebSocketsProvider>
         <AppV2 />
-      </AppStateProvider>
-    </ThemeProvider>
+      </WebSocketsProvider>
+    </AppStateProvider>
   </PrimeReactProvider>,
 );

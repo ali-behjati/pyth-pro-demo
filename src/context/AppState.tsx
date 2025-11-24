@@ -10,7 +10,21 @@ import type {
   Nullish,
   PriceData,
 } from "../types";
-import { isAllowedSymbol } from "../util";
+import {
+  DATA_SOURCES_CRYPTO,
+  DATA_SOURCES_EQUITY,
+  DATA_SOURCES_FOREX,
+  DATA_SOURCES_FUTURES,
+  DATA_SOURCES_TREASURY,
+} from "../types";
+import {
+  isAllowedCryptoSymbol,
+  isAllowedEquitySymbol,
+  isAllowedForexSymbol,
+  isAllowedFutureSymbol,
+  isAllowedSymbol,
+  isAllowedTreasurySymbol,
+} from "../util";
 
 export type AppStateContextVal = CurrentPricesState & {
   addDataPoint: (
@@ -18,6 +32,8 @@ export type AppStateContextVal = CurrentPricesState & {
     symbol: AllAllowedSymbols,
     dataPoint: PriceData,
   ) => void;
+
+  dataSourcesInUse: AllDataSourcesType[];
 
   handleSelectSource: (source: AllAllowedSymbols) => void;
 };
@@ -83,14 +99,32 @@ export function AppStateProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
+  /** memos */
+  const dataSourcesInUse = useMemo(() => {
+    let out: AllDataSourcesType[] = [];
+    if (isAllowedCryptoSymbol(appState.selectedSource)) {
+      out = [...DATA_SOURCES_CRYPTO];
+    } else if (isAllowedForexSymbol(appState.selectedSource)) {
+      out = [...DATA_SOURCES_FOREX];
+    } else if (isAllowedEquitySymbol(appState.selectedSource)) {
+      out = [...DATA_SOURCES_EQUITY];
+    } else if (isAllowedTreasurySymbol(appState.selectedSource)) {
+      out = [...DATA_SOURCES_TREASURY];
+    } else if (isAllowedFutureSymbol(appState.selectedSource)) {
+      out = [...DATA_SOURCES_FUTURES];
+    }
+    return out.sort();
+  }, [appState.selectedSource]);
+
   /** provider val */
   const providerVal = useMemo<AppStateContextVal>(
     () => ({
       ...appState,
       addDataPoint,
+      dataSourcesInUse,
       handleSelectSource,
     }),
-    [appState, handleSelectSource],
+    [appState, dataSourcesInUse, handleSelectSource],
   );
 
   return <context.Provider value={providerVal}>{children}</context.Provider>;
