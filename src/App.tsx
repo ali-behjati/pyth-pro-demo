@@ -18,6 +18,7 @@ import {
   DATA_SOURCES_CRYPTO,
   DATA_SOURCES_EQUITY,
   DATA_SOURCES_FOREX,
+  DATA_SOURCES_FUTURES,
   DATA_SOURCES_TREASURY,
 } from "./types";
 import {
@@ -25,6 +26,7 @@ import {
   isAllowedCryptoSymbol,
   isAllowedEquitySymbol,
   isAllowedForexSymbol,
+  isAllowedFutureSymbol,
   isAllowedSymbol,
   isAllowedTreasurySymbol,
 } from "./util";
@@ -110,6 +112,8 @@ export function App() {
       out = [...DATA_SOURCES_EQUITY];
     } else if (isAllowedTreasurySymbol(selectedSource)) {
       out = [...DATA_SOURCES_TREASURY];
+    } else if (isAllowedFutureSymbol(selectedSource)) {
+      out = [...DATA_SOURCES_FUTURES];
     }
     return out.sort();
   }, [selectedSource]);
@@ -123,6 +127,8 @@ export function App() {
       coinbase,
       infoway_io,
       okx,
+      // TODO: Do we remove this? Massive makes up pay immediately
+      massive: "closed",
       prime_api,
       pyth,
       pyth_lazer,

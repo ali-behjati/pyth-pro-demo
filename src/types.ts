@@ -15,28 +15,17 @@ export type UseDataProviderSocketHookReturnType = {
   ) => void;
 };
 
-export const ALLOWED_ES_SYMBOLS = ["ESZ2025", "ESH2026"] as const;
+export const ALLOWED_FUTURE_SYMBOLS = ["ESZ2025", "ESH2026"] as const;
 
 export const ALLOWED_CRYPTO_SYMBOLS = [
   "BTCUSDT",
   "ETHUSDT",
   "SOLUSDT",
 ] as const;
-export const ALLOWED_EQUITY_SYMBOLS = [
-  "AAPL",
-  "NVDA",
-  "TSLA",
-  "SPY",
-  ...ALLOWED_ES_SYMBOLS,
-] as const;
+export const ALLOWED_EQUITY_SYMBOLS = ["AAPL", "NVDA", "TSLA", "SPY"] as const;
 export const ALLOWED_FOREX_SYMBOLS = ["EURUSD"] as const;
 export const ALLOWED_TREASURY_SYMBOLS = [] as const;
 // export const ALLOWED_TREASURY_SYMBOLS = ["US10Y"] as const;
-
-export const EQUITY_SYMBOL_TO_PYTH_SYMBOL = new Map([
-  ["ESZ2025", "EMZ5"],
-  ["ESH2026", "EMH6"],
-]);
 
 export const DATA_SOURCES_CRYPTO = [
   "binance",
@@ -61,6 +50,8 @@ export const DATA_SOURCES_FOREX = [
   "infoway_io",
 ] as const;
 
+export const DATA_SOURCES_FUTURES = ["pyth", "pyth_lazer"] as const;
+
 export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer", "yahoo"] as const;
 
 export const ALL_DATA_SOURCES = [
@@ -69,6 +60,7 @@ export const ALL_DATA_SOURCES = [
     ...DATA_SOURCES_EQUITY,
     ...DATA_SOURCES_FOREX,
     ...DATA_SOURCES_TREASURY,
+    ...DATA_SOURCES_FUTURES,
   ]),
 ];
 
@@ -80,7 +72,9 @@ export type AllowedEquitySymbolsType = ArrayValues<
   typeof ALLOWED_EQUITY_SYMBOLS
 >;
 
-export type AllowedEsSymbolsType = ArrayValues<typeof ALLOWED_ES_SYMBOLS>;
+export type AllowedFutureSymbolsType = ArrayValues<
+  typeof ALLOWED_FUTURE_SYMBOLS
+>;
 
 export type AllowedForexSymbolsType = ArrayValues<typeof ALLOWED_FOREX_SYMBOLS>;
 
@@ -91,7 +85,8 @@ export type AllowedTreasureySymbolsType = ArrayValues<
 export type AllAllowedSymbols =
   | AllowedCryptoSymbolsType
   | AllowedEquitySymbolsType
-  | AllowedForexSymbolsType;
+  | AllowedForexSymbolsType
+  | AllowedFutureSymbolsType;
 
 export type DataSourcesCryptoType = ArrayValues<typeof DATA_SOURCES_CRYPTO>;
 
@@ -101,11 +96,14 @@ export type DataSourcesForexType = ArrayValues<typeof DATA_SOURCES_FOREX>;
 
 export type DataSourcesTreasuryType = ArrayValues<typeof DATA_SOURCES_TREASURY>;
 
+export type DataSourceFuturesType = ArrayValues<typeof DATA_SOURCES_FUTURES>;
+
 export type AllDataSourcesType =
   | DataSourcesCryptoType
   | DataSourcesEquityType
   | DataSourcesForexType
-  | DataSourcesTreasuryType;
+  | DataSourcesTreasuryType
+  | DataSourceFuturesType;
 
 export type PriceData = {
   price: number;
@@ -140,6 +138,7 @@ export const ALL_SYMBOLS = [
     ...ALLOWED_EQUITY_SYMBOLS,
     ...ALLOWED_FOREX_SYMBOLS,
     ...ALLOWED_TREASURY_SYMBOLS,
+    ...ALLOWED_FUTURE_SYMBOLS,
   ]),
 ];
 
@@ -161,6 +160,11 @@ const SOURCE_SELECTOR_OPTS = [
   })),
   ...ALLOWED_TREASURY_SYMBOLS.map((symbol) => ({
     group: "treasuries",
+    label: symbol,
+    value: symbol,
+  })),
+  ...ALLOWED_FUTURE_SYMBOLS.map((symbol) => ({
+    group: "futures",
     label: symbol,
     value: symbol,
   })),

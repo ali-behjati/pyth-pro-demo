@@ -2,6 +2,7 @@ import type {
   AllAllowedSymbols,
   AllowedCryptoSymbolsType,
   AllowedEquitySymbolsType,
+  AllowedFutureSymbolsType,
   AllowedForexSymbolsType,
   AllowedTreasureySymbolsType,
   DataSourcesCryptoType,
@@ -14,6 +15,7 @@ import {
   ALL_SYMBOLS,
   ALLOWED_CRYPTO_SYMBOLS,
   ALLOWED_EQUITY_SYMBOLS,
+  ALLOWED_FUTURE_SYMBOLS,
   ALLOWED_FOREX_SYMBOLS,
   ALLOWED_TREASURY_SYMBOLS,
   DATA_SOURCES_CRYPTO,
@@ -102,5 +104,15 @@ export function isAllowedTreasuryDataSource(
   for (const s of DATA_SOURCES_TREASURY) {
     if (s === dataSource) return true;
   }
+  return false;
+}
+
+export function isAllowedFutureSymbol(
+  symbol: Nullish<string>,
+): symbol is AllowedFutureSymbolsType {
+  for (const s of ALLOWED_FUTURE_SYMBOLS) {
+    if (s === symbol) return true;
+  }
+
   return false;
 }
