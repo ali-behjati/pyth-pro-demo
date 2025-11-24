@@ -8,8 +8,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
-    "dev": "bun run dev:server & bun run dev:ui",
+    "build": "bun run clean:themes && bun run copy:themes && tsc && vite build",
+    "clean:themes": "rm -rf ./public/themes",
+    "copy:themes": "cp -r node_modules/primereact/resources/themes ./public/themes",
+    "dev": "bun run clean:themes && bun run copy:themes && bun run dev:server & bun run dev:ui",
     "dev:server": "bun --hot ./src/server.ts",
     "dev:ui": "vite",
     "lint": "eslint './src' --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -17,9 +19,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-hookz/web": "^25.2.0",
     "@solana/web3.js": "^1.98.4",
     "change-case": "^5.4.4",
     "chart.js": "^4.5.1",
+    "primereact": "^10.9.7",
+    "primeicons": "^7.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.4.1",

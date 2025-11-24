@@ -1,13 +1,20 @@
+import "./globals.css";
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { PrimeReactProvider } from "primereact/api";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import "./index.css";
-import { App } from "./App";
-import { AppStateProvider } from "./context";
+import "primeicons/primeicons.css";
+import { AppV2 } from "./AppV2";
+import { AppStateProvider, ThemeProvider } from "./context";
 
 ReactDOM.createRoot(document.querySelector("#root")!).render(
-  <AppStateProvider>
-    <App />
-  </AppStateProvider>,
+  <PrimeReactProvider>
+    <ThemeProvider>
+      <AppStateProvider>
+        <AppV2 />
+      </AppStateProvider>
+    </ThemeProvider>
+  </PrimeReactProvider>,
 );
