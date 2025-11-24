@@ -15,15 +15,28 @@ export type UseDataProviderSocketHookReturnType = {
   ) => void;
 };
 
+export const ALLOWED_ES_SYMBOLS = ["ESZ2025", "ESH2026"] as const;
+
 export const ALLOWED_CRYPTO_SYMBOLS = [
   "BTCUSDT",
   "ETHUSDT",
   "SOLUSDT",
 ] as const;
-export const ALLOWED_EQUITY_SYMBOLS = ["AAPL", "NVDA", "TSLA", "SPY"] as const;
+export const ALLOWED_EQUITY_SYMBOLS = [
+  "AAPL",
+  "NVDA",
+  "TSLA",
+  "SPY",
+  ...ALLOWED_ES_SYMBOLS,
+] as const;
 export const ALLOWED_FOREX_SYMBOLS = ["EURUSD"] as const;
 export const ALLOWED_TREASURY_SYMBOLS = [] as const;
 // export const ALLOWED_TREASURY_SYMBOLS = ["US10Y"] as const;
+
+export const EQUITY_SYMBOL_TO_PYTH_SYMBOL = new Map([
+  ["ESZ2025", "EMZ5"],
+  ["ESH2026", "EMH6"],
+]);
 
 export const DATA_SOURCES_CRYPTO = [
   "binance",
@@ -66,6 +79,8 @@ export type AllowedCryptoSymbolsType = ArrayValues<
 export type AllowedEquitySymbolsType = ArrayValues<
   typeof ALLOWED_EQUITY_SYMBOLS
 >;
+
+export type AllowedEsSymbolsType = ArrayValues<typeof ALLOWED_ES_SYMBOLS>;
 
 export type AllowedForexSymbolsType = ArrayValues<typeof ALLOWED_FOREX_SYMBOLS>;
 
