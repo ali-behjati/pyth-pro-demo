@@ -6,7 +6,7 @@ import { useAppStateContext } from "./context";
 
 export function AppV2() {
   /** context */
-  const { selectedSource } = useAppStateContext();
+  const { dataSourcesInUse, selectedSource } = useAppStateContext();
 
   return (
     <div className={classes.root}>
@@ -16,7 +16,9 @@ export function AppV2() {
           <PriceCards />
         </aside>
         <article>
-          <PriceChart key={selectedSource} />
+          <PriceChart
+            key={`${selectedSource ?? ""}-${dataSourcesInUse.join(", ")}`}
+          />
         </article>
       </main>
     </div>

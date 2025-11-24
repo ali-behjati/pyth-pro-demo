@@ -163,11 +163,14 @@ export function PriceChart() {
     };
   }, []);
 
-  if (!isAllowedSymbol(state.selectedSource)) return null;
-
   return (
     <div className={classes.priceChartRoot}>
-      <canvas ref={setChartRef} />
+      {isAllowedSymbol(state.selectedSource) && <canvas ref={setChartRef} />}
+      {!isAllowedSymbol(state.selectedSource) && (
+        <div className={classes.priceChartEmptyState}>
+          Please select a data source from the drop down in the top toolbar.
+        </div>
+      )}
     </div>
   );
 }

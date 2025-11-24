@@ -219,11 +219,17 @@ export function useDataStream({
 
   /** websocket */
   const url = getUrlForSymbolAndDataSource(dataSource, symbol);
-  const { status } = useWebSocket(url, {
-    enabled: enabled && Boolean(url),
-    onMessage,
-    onOpen,
-  });
+  const parsedUrl = url ? new URL(url) : null;
+  parsedUrl?.searchParams.set("cachebust", symbol ?? "");
+  const { status } = useWebSocket(
+    // binance is really bad. it just explodes if it sees query params
+    dataSource === "binance" ? url : parsedUrl?.toString(),
+    {
+      enabled: enabled && Boolean(url),
+      onMessage,
+      onOpen,
+    },
+  );
 
   return { status };
 }
