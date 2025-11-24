@@ -33,26 +33,26 @@ export const DATA_SOURCES_CRYPTO = [
   "coinbase",
   "okx",
   "pyth",
-  "pyth_lazer",
+  "pyth_pro",
 ] as const;
 
 export const DATA_SOURCES_EQUITY = [
   "pyth",
-  "pyth_lazer",
+  "pyth_pro",
   "infoway_io",
   "twelve_data",
 ] as const;
 
 export const DATA_SOURCES_FOREX = [
   "pyth",
-  "pyth_lazer",
+  "pyth_pro",
   "prime_api",
   "infoway_io",
 ] as const;
 
-export const DATA_SOURCES_FUTURES = ["pyth", "pyth_lazer"] as const;
+export const DATA_SOURCES_FUTURES = ["pyth", "pyth_pro"] as const;
 
-export const DATA_SOURCES_TREASURY = ["pyth", "pyth_lazer", "yahoo"] as const;
+export const DATA_SOURCES_TREASURY = ["pyth", "pyth_pro", "yahoo"] as const;
 
 export const ALL_DATA_SOURCES = [
   ...new Set([

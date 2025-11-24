@@ -50,7 +50,7 @@ const initialState: CurrentPricesState = {
   okx: emptyDataSourceResults,
   prime_api: emptyDataSourceResults,
   pyth: emptyDataSourceResults,
-  pyth_lazer: emptyDataSourceResults,
+  pyth_pro: emptyDataSourceResults,
   selectedSource: null,
   twelve_data: emptyDataSourceResults,
   yahoo: emptyDataSourceResults,

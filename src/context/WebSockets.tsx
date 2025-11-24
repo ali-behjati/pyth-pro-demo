@@ -66,8 +66,8 @@ export function WebSocketsProvider({ children }: PropsWithChildren) {
     symbol: selectedSource,
   });
 
-  const { status: pyth_lazer } = useDataStream({
-    dataSource: "pyth_lazer",
+  const { status: pyth_pro } = useDataStream({
+    dataSource: "pyth_pro",
     enabled: isGoodSymbol && Boolean(API_TOKEN_PYTH_LAZER),
     symbol: selectedSource,
   });
@@ -101,7 +101,7 @@ export function WebSocketsProvider({ children }: PropsWithChildren) {
         okx,
         prime_api,
         pyth,
-        pyth_lazer,
+        pyth_pro,
         twelve_data,
         yahoo: "connected",
       },
@@ -114,7 +114,7 @@ export function WebSocketsProvider({ children }: PropsWithChildren) {
       okx,
       prime_api,
       pyth,
-      pyth_lazer,
+      pyth_pro,
       twelve_data,
     ],
   );

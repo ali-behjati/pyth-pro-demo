@@ -8,7 +8,7 @@ const palette: Partial<Record<AllDataSourcesType, string>> = {
   okx: "orange",
   prime_api: "#ff4466",
   pyth: "purple",
-  pyth_lazer: "teal",
+  pyth_pro: "teal",
   twelve_data: "burlywood",
 };
 

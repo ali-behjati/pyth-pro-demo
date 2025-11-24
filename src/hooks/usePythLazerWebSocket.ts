@@ -117,7 +117,7 @@ export function usePythLazerWebSocket(): UseDataProviderSocketHookReturnType {
             // pyth_lazer price has 8 decimal places precision, convert to dollars
             const priceRaw = Number.parseFloat(price);
 
-            addDataPoint("pyth_lazer", symbol, {
+            addDataPoint("pyth_pro", symbol, {
               price: priceRaw * Math.pow(10, exponent),
               timestamp: Date.now(),
             });
